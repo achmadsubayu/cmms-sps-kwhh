@@ -82,7 +82,6 @@ let breakdownFreq = {};
 // --- TAMBAHAN: Variabel Global untuk Chart Tampilan ---
 let tampilanSpeedChartInstance;
 let tampilanDtChartInstance;
-// UBAHAN INTEGRASI INFLUX: Data dikosongkan diawal agar bisa diisi histori sampai ~900 data (15 menit)
 let tampilanTimeLabels = [];
 let tampilanSpeedData = [];
 let isLiveView = true; // Flag untuk tracking status Live view auto-scroll sumbu X
@@ -91,7 +90,6 @@ let isLiveView = true; // Flag untuk tracking status Live view auto-scroll sumbu
 // Array Global Untuk Menampung Semua Riwayat Breakdown
 let allBreakdownEvents = [];
 
-// --- TAMBAHAN FITUR: FETCH HISTORI DARI PC LOKAL INFLUXDB ---
 function fetchHistoryFromLocal(machineId) {
     fetch(`https://marvelous-undamaged-flagship.ngrok-free.dev/api/read-sensor/${machineId}`)
     .then(res => res.json())
@@ -123,16 +121,13 @@ function fetchHistoryFromLocal(machineId) {
         }
     }).catch(e => console.warn("Menunggu API Lokal InfluxDB menyala..."));
 }
-// -----------------------------------------------------------
 
-// --- TAMBAHAN FITUR: UNDUH HISTORI SPEED (CSV) DARI INFLUXDB ---
 function downloadSpeedHistory() {
     if (!currentMachine) {
         alert("Pilih mesin terlebih dahulu sebelum mengunduh data!");
         return;
     }
 
-    // Meminta seluruh data histori dari API yang sama
     fetch(`https://marvelous-undamaged-flagship.ngrok-free.dev/api/read-sensor/${currentMachine}`)
     .then(res => res.json())
     .then(data => {
@@ -141,13 +136,10 @@ function downloadSpeedHistory() {
             return;
         }
 
-        // UBAHAN: Siapkan header CSV dengan Shift dan Produk
         let csvContent = "data:text/csv;charset=utf-8,Waktu (Timestamp),Kecepatan Aktual (m/min),Shift Operasional,Nama Produk\r\n";
 
-        // Loop setiap titik data lalu masukkan ke CSV
         data.forEach(item => {
             let dt = new Date(item.time);
-            // Format waktu biar mudah dibaca di Excel: YYYY-MM-DD HH:mm:ss
             let formattedTime = dt.getFullYear() + '-' + 
                                 String(dt.getMonth() + 1).padStart(2, '0') + '-' + 
                                 String(dt.getDate()).padStart(2, '0') + ' ' + 
@@ -155,12 +147,10 @@ function downloadSpeedHistory() {
                                 String(dt.getMinutes()).padStart(2, '0') + ':' + 
                                 String(dt.getSeconds()).padStart(2, '0');
             
-            // UBAHAN: Sisipkan Shift dan Produk (Gunakan "" agar aman jika ada spasi pada produk)
             let row = `"${formattedTime}","${item.speed}","${item.shift || '-'}","${item.product || '-'}"`;
             csvContent += row + "\r\n";
         });
 
-        // Trigger Download File
         let encodedUri = encodeURI(csvContent);
         let link = document.createElement("a");
         link.setAttribute("href", encodedUri);
@@ -178,9 +168,7 @@ function downloadSpeedHistory() {
         alert("Gagal mengunduh data. Pastikan API Lokal InfluxDB menyala (node server.js).");
     });
 }
-// -----------------------------------------------------------
 
-// --- TAMBAHAN FITUR: RESET KE LIVE VIEW RATAKANAN SISA 20 DETIK ---
 function resetLiveView() {
     isLiveView = true;
     let btn = document.getElementById('btnLiveView');
@@ -192,7 +180,6 @@ function resetLiveView() {
         tampilanSpeedChartInstance.update('none');
     }
 }
-// -----------------------------------------------------------
 
 // --- FIREBASE RTDB AUTO BREAKDOWN ---
 const firebaseUrlRT = 'https://cmms-2c23c-default-rtdb.asia-southeast1.firebasedatabase.app//speed_mesin.json';        
@@ -200,7 +187,6 @@ const firebaseUrlRT = 'https://cmms-2c23c-default-rtdb.asia-southeast1.firebased
 let realtimeDBData = {};
 let pendingAutoBd = { machineId: null, elapsedSec: 0 }; 
 
-// Fetch Schedules & Breakdowns secara sinkron (Sekarang dipanggil berulang via setInterval)
 function fetchSchedulesFromFirebase() {
     fetch('https://cmms-2c23c-default-rtdb.asia-southeast1.firebasedatabase.app//schedules.json')
     .then(res => res.json())
@@ -208,7 +194,6 @@ function fetchSchedulesFromFirebase() {
         if (data) {
             let validSchedules = [];
 
-            // Membaca object dari Firebase yang SUDAH DIKALKULASI OLEH PYTHON
             Object.keys(data).forEach(key => {
                 let obj = data[key];
                 if(obj && typeof obj === 'object' && obj.idJadwal && obj.mesin && obj.mesin !== "undefined") {
@@ -219,7 +204,6 @@ function fetchSchedulesFromFirebase() {
             
             scheduleDataList = validSchedules;
             
-            // Otomatis set produk (Sync)
             let currentTglIso = getFactoryDateIso();
             rawMachineList.forEach(id => {
                 let mData = machineData[id];
@@ -229,7 +213,12 @@ function fetchSchedulesFromFirebase() {
                 }
             });
         }
-    }).catch(e => { console.error("Error fetch schedules:", e); });
+    })
+    .catch(e => { console.error("Error fetch schedules:", e); })
+    .finally(() => {
+        // PERBAIKAN MUTLAK: Wajib memanggil fetch breakdown agar state mesin ikut tersinkronisasi!
+        fetchBreakdownStatesFromFirebase();
+    });
 }
 
 function fetchBreakdownStatesFromFirebase() {
@@ -237,14 +226,12 @@ function fetchBreakdownStatesFromFirebase() {
     .then(res => res.json())
     .then(data => {
         if (data) {
-            // Sorting berdasarkan waktu agar membaca riwayat mesin dengan benar
             let rawEvents = Object.values(data).sort((a,b) => a.timestamp - b.timestamp);
             let latestState = {};
             let processedEnds = {};
             let processedStarts = {};
             let filteredEvents = []; 
 
-            // Menyusun ulang status Timer dari event POST Firebase
             rawEvents.forEach(ev => {
                 if (ev.type === 'START') {
                     if (processedStarts[ev.machine] && (ev.timestamp - processedStarts[ev.machine] < 15000)) return;
@@ -274,13 +261,11 @@ function fetchBreakdownStatesFromFirebase() {
             }
             
             updateBreakdownUI();
-            refreshDashboardUI();
             updateDowntimeBadge();
         }
     }).catch(e => { console.error("Error fetch breakdowns:", e); });
 }
 
-// Fungsi untuk mengambil state "Pilih Run" dari Firebase
 function fetchActiveRunsFromFirebase() {
     fetch('https://cmms-2c23c-default-rtdb.asia-southeast1.firebasedatabase.app//active_runs.json')
     .then(res => res.json())
@@ -316,9 +301,7 @@ function fetchAccumulatedPowerFromFirebase() {
         }
     }).catch(e => console.error("Gagal menarik data akumulasi daya dari Firebase:", e));
 }
-// -------------------------------------------------------------------------------------
 
-// --- FUNGSI PINTAR MEMBACA PENDING DOWNTIME DARI PYTHON BACKEND ---
 function fetchWaitingResolution() {
     fetch('https://cmms-2c23c-default-rtdb.asia-southeast1.firebasedatabase.app/waiting_resolution.json')
     .then(res => res.json())
@@ -340,16 +323,13 @@ function fetchWaitingResolution() {
                 modalEl.classList.add('active');
             }
         } else {
-            // Tutup jika sudah diresolve oleh device lain atau pindah halaman (Atau dipaksa tutup oleh Python saat ganti shift)
             if (modalEl.classList.contains('active') && pendingAutoBd.machineId === currentMachine) {
                 modalEl.classList.remove('active');
             }
         }
     }).catch(e => {});
 }
-// --------------------------------------------------------------------------------
 
-// --- FUNGSI BARU: UPDATE BADGE DOWNTIME DI SIDEBAR ---
 function updateDowntimeBadge() {
     let pendingCount = 0;
     let currentTglIso = getFactoryDateIso();
@@ -380,9 +360,7 @@ function updateDowntimeBadge() {
         }
     }
 }
-// ------------------------------------------------------
 
-// --- FUNGSI BARU: SINKRONISASI RESOLUSI DOWNTIME SECARA SILUMAN LINTAS HP ---
 function applySilentBreakdownResolution(macId, finalCategory) {
     let mData = machineData[macId];
     if (!mData || !mData.breakdown.isActive) return;
@@ -408,9 +386,7 @@ function applySilentBreakdownResolution(macId, finalCategory) {
     }
     updateDowntimeBadge();
 }
-// --------------------------------------------------------------------------------
 
-// Fungsi fetch real-time (Hanya untuk Speed Sensor Dashboard - Kalkulasi rumit sudah di Python)
 function pollRealtimeData() {
     if (isResettingSchedule) return;
 
@@ -424,7 +400,6 @@ function pollRealtimeData() {
         return; 
     }
 
-    // Hanya Fetch Speed untuk tampilan Speedometer UI
     fetch(firebaseUrlRT)
       .then(res => res.json())
       .then(data => {
@@ -447,7 +422,6 @@ function pollRealtimeData() {
           }
       }).catch(e => console.warn("Menunggu koneksi RTDB Speed...", e));
 
-    // Sinkronisasi status resolve downtime dari tab/HP lain (atau paksaan shift close dari Python)
     fetch('https://cmms-2c23c-default-rtdb.asia-southeast1.firebasedatabase.app//bd_resolved_flag.json')
     .then(res => res.json())
     .then(flags => {
@@ -464,11 +438,14 @@ function pollRealtimeData() {
         }
     }).catch(e => {});
 
-    fetchWaitingResolution(); // Gantikan checkPendingModal() dengan trigger fetch JSON langsung
+    fetchWaitingResolution(); 
     updateDowntimeBadge();
+    
+    // Panggil untuk mengupdate indikator visual UI agar responsif seketika
+    refreshDashboardUI();
+    if(document.getElementById('page-tampilan').classList.contains('active')) updateTampilanUI();
 }
 
-// PERBAIKAN MUTLAK PENYIMPANAN RESOLUSI DOWNTIME YANG TELAH DIAMBIL ALIH OLEH PYTHON
 function saveAutoBreakdown(finalCategory, forceMacId = null, forceSec = null) {
     let macId = forceMacId || pendingAutoBd.machineId;
     let elapsedSec = forceSec !== null ? forceSec : pendingAutoBd.elapsedSec;
@@ -481,19 +458,16 @@ function saveAutoBreakdown(finalCategory, forceMacId = null, forceSec = null) {
     let mData = machineData[macId];
     let productBeforeBd = mData ? mData.currentProduct : "IDLE";
 
-    // 1. Kasih tau Python/Firebase bahwa ini sudah di-resolve
     fetch(`https://cmms-2c23c-default-rtdb.asia-southeast1.firebasedatabase.app//bd_resolved_flag/${macId}.json`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ category: finalCategory, timestamp: Date.now() })
     }).catch(e => {});
 
-    // 2. Hapus flag pending resolution dari Python
     fetch(`https://cmms-2c23c-default-rtdb.asia-southeast1.firebasedatabase.app/waiting_resolution/${macId}.json`, {
         method: 'DELETE'
     }).catch(e => {});
 
-    // 3. Post event END
     let correctTglIso = getFactoryDateIso();
     let correctShift = getCurrentShiftInfo();
 
@@ -637,7 +611,6 @@ function syncTampilanMachine() {
     fetchHistoryFromLocal(currentMachine);
 }
 
-// --- FUNGSI BARU: Hitung Akumulasi Downtime Berdasarkan Event yang tersimpan di memori/Firebase ---
 function recalcDowntimeAccumulation() {
     let currentTglIso = getFactoryDateIso();
     let totalPabrik = { production: 0, maintenance: 0, ppic: 0 };
@@ -837,9 +810,17 @@ function updateTampilanUI() {
     document.getElementById('tampilan-shift').innerText = getCurrentShiftLabel();
     
     let currentTglIso = getFactoryDateIso();
-    
-    let isCurrentlyBd = mData.breakdown.isActive;
     let productToCheck = mData.currentProduct;
+    let isIdle = productToCheck.includes("IDLE") || productToCheck.includes("BELUM ADA JADWAL") || productToCheck === "";
+
+    // --- PERBAIKAN MUTLAK VISUAL INSTAN ---
+    // Jangan tunggu response backend jika kecepatan asli di realtimeDB adalah 0
+    let curSpeed = 0;
+    if (realtimeDBData[currentMachine] && realtimeDBData[currentMachine].speed !== undefined) {
+        curSpeed = parseFloat(realtimeDBData[currentMachine].speed);
+    }
+    
+    let isVisuallyDown = mData.breakdown.isActive || (!isIdle && curSpeed < 20);
 
     let matchingScheds = scheduleDataList.filter(s => 
         s.tglFull === currentTglIso && 
@@ -848,19 +829,16 @@ function updateTampilanUI() {
     );
 
     let activeSched = matchingScheds.find(s => s.produk.trim() === productToCheck.trim());
-    
     if (!activeSched && matchingScheds.length > 0) {
         activeSched = matchingScheds[matchingScheds.length - 1]; 
     }
 
-    let isIdle = productToCheck.includes("IDLE") || productToCheck.includes("BELUM ADA JADWAL") || productToCheck === "";
-
     let kondisiEl = document.getElementById('tampilan-kondisi');
     let produkEl = document.getElementById('tampilan-produk');
 
-    if (isCurrentlyBd) {
+    if (isVisuallyDown) {
         if (kondisiEl) { kondisiEl.innerText = "BREAKDOWN"; kondisiEl.style.color = "var(--danger)"; }
-        if (produkEl) { produkEl.innerText = activeSched ? activeSched.produk : productToCheck; produkEl.style.color = "var(--text-dark)"; }
+        if (produkEl) { produkEl.innerText = activeSched ? activeSched.produk : productToCheck; produkEl.style.color = "var(--danger)"; }
     } else if (isIdle) {
         if (kondisiEl) { kondisiEl.innerText = "IDLE / STANDBY"; kondisiEl.style.color = "var(--warning)"; }
         if (produkEl) { 
@@ -876,7 +854,6 @@ function updateTampilanUI() {
     let schedActual = "-";
     let schedAvgSpeed = "-";
     let schedEff = "0%";
-
     let schedDtMtc = "-";
     let schedDtProd = "-";
     let schedDtPpic = "-";
@@ -918,7 +895,6 @@ function updateTampilanUI() {
     document.getElementById('tampilan-actual').innerText = schedActual;
     document.getElementById('tampilan-avg-speed').innerText = schedAvgSpeed;
     document.getElementById('tampilan-eff').innerText = schedEff;
-
     document.getElementById('tampilan-dt-mtc').innerText = schedDtMtc;
     document.getElementById('tampilan-dt-prod').innerText = schedDtProd;
     document.getElementById('tampilan-dt-ppic').innerText = schedDtPpic;
@@ -944,7 +920,6 @@ function resetTampilanOrder() {
     document.getElementById('tampilan-actual').innerText = "-";
     document.getElementById('tampilan-avg-speed').innerText = "-";
     document.getElementById('tampilan-eff').innerText = "0%";
-
     document.getElementById('tampilan-dt-mtc').innerText = "-";
     document.getElementById('tampilan-dt-prod').innerText = "-";
     document.getElementById('tampilan-dt-ppic').innerText = "-";
@@ -1045,7 +1020,6 @@ setInterval(() => {
         
         currentActiveShift = newShift;
         
-        // Reset parameter running UI shift baru
         rawMachineList.forEach(id => {
             if (machineData[id]) {
                 machineData[id].activeSecondsThisShift = 0;
@@ -1085,7 +1059,6 @@ setInterval(() => {
     let isQualityPageActive = document.getElementById('page-schedule-maintenance').classList.contains('active');
     let isTampilanActive = document.getElementById('page-tampilan').classList.contains('active');
 
-    // UI RENDER LOOP: Karena Python sekarang menghitung semuanya, kita cukup menampilkan d.eff, d.oee dst
     if(scheduleDataList.length > 0) {
         scheduleDataList.forEach((d, index) => {
             if (d.tglFull === currentTglIso && d.shift === currentActiveShift) {
@@ -1104,7 +1077,6 @@ setInterval(() => {
                 }
             }
             
-            // Render Live update ke cell (Selama user tidak sedang mengetik di dalam cell tersebut)
             if (isSchedulePageActive) {
                 let cellActual = document.getElementById(`sched-actual-${index}`);
                 if (cellActual && document.activeElement !== cellActual) {
@@ -1147,10 +1119,6 @@ setInterval(() => {
         renderElectricityTable();
     }
 
-    if(isTampilanActive) {
-        updateTampilanUI();
-    }
-
 }, 1000);
 
 function formatTime(totalSeconds) {
@@ -1171,7 +1139,6 @@ function exportAndClearSchedule() {
     }
 
     let todayIso = getFactoryDateIso();
-
     let pastSchedules = scheduleDataList.filter(s => s.tglFull < todayIso);
     let activeSchedules = scheduleDataList.filter(s => s.tglFull >= todayIso);
 
@@ -1308,7 +1275,10 @@ function renderElectricityTable() {
         let activeScheds = scheduleDataList.filter(s => s.mesin === id && s.tglFull === todayIso && s.shift === currentActiveShift);
         let hasSchedule = activeScheds.length > 0;
         let isIdle = mData.currentProduct.includes("IDLE") || mData.currentProduct.includes("BELUM ADA JADWAL");
-        let isBd = mData.breakdown.isActive;
+        
+        let curSpeed = 0;
+        if (realtimeDBData[id] && realtimeDBData[id].speed !== undefined) curSpeed = parseFloat(realtimeDBData[id].speed);
+        let isBd = mData.breakdown.isActive || (!isIdle && curSpeed < 20);
 
         let statusLed = '';
         if (!hasSchedule || isIdle) {
@@ -1372,14 +1342,6 @@ function saveProductionUpdate() {
             timestamp: Date.now()
         })
     }).catch(e => console.error(e));
-    
-    let currentTglIso = getFactoryDateIso();
-    
-    let matchingSched = scheduleDataList.find(s => s.tglFull === currentTglIso && s.shift === currentActiveShift && s.mesin === machineId && s.produk.trim() === selectedProduct.trim());
-    
-    if(!matchingSched) {
-        console.log(`Produk ${selectedProduct} tidak ada di jadwal, diubah secara manual.`);
-    }
 
     closeModal('updateProductionModal');
     if(document.getElementById('page-production').classList.contains('active')) renderProductionTable();
@@ -1481,10 +1443,7 @@ function toggleWoMachineManual() {
 
 function saveManualWo() {
     let mac = document.getElementById('inputWoMachine').value;
-    
-    if (mac === 'Lainnya') {
-        mac = document.getElementById('inputWoMachineManual').value.trim();
-    }
+    if (mac === 'Lainnya') mac = document.getElementById('inputWoMachineManual').value.trim();
     
     let dept = document.getElementById('inputWoDept').value;
     let deadline = document.getElementById('inputWoDeadline').value;
@@ -1494,12 +1453,10 @@ function saveManualWo() {
         return alert("Pilih mesin, departemen requestor, deadline, dan isi deskripsi keluhan terlebih dahulu!");
     }
 
-    let newTask = `[Req: ${dept}] | Deadline: ${deadline}\nKeluhan: ${desc}`;
-
     let woEntry = {
         id: 'WO-M-' + Math.floor(Math.random() * 9000 + 1000),
         machine: mac,
-        task: newTask,
+        task: `[Req: ${dept}] | Deadline: ${deadline}\nKeluhan: ${desc}`,
         status: 'Menunggu Eksekusi',
         dept: dept,          
         deadline: deadline, 
@@ -1507,7 +1464,6 @@ function saveManualWo() {
     };
 
     workOrders.manual.push(woEntry);
-    
     syncToGoogleSheets("addWo", woEntry);
 
     closeModal('addWoModal');
@@ -1517,11 +1473,8 @@ function saveManualWo() {
 
 function toggleUnitManual() {
     let val = document.getElementById('logUnit').value;
-    if(val === 'Lainnya') {
-        document.getElementById('logUnitManual').style.display = 'block';
-    } else {
-        document.getElementById('logUnitManual').style.display = 'none';
-    }
+    if(val === 'Lainnya') document.getElementById('logUnitManual').style.display = 'block';
+    else document.getElementById('logUnitManual').style.display = 'none';
 }
 
 function calcLogbookTime() {
@@ -1531,13 +1484,9 @@ function calcLogbookTime() {
     if(start && end) {
         let startTime = new Date(`1970-01-01T${start}:00`);
         let endTime = new Date(`1970-01-01T${end}:00`);
-        
         let diffMs = endTime - startTime;
-        if(diffMs < 0) {
-            diffMs += 24 * 60 * 60 * 1000; 
-        }
-        let diffMins = Math.round(diffMs / 60000);
-        document.getElementById('logTotalWaktu').value = diffMins;
+        if(diffMs < 0) diffMs += 24 * 60 * 60 * 1000; 
+        document.getElementById('logTotalWaktu').value = Math.round(diffMs / 60000);
     }
 }
 
@@ -1547,9 +1496,7 @@ function saveLogbook() {
     let mesin = document.getElementById('logMesin').value;
     
     let unit = document.getElementById('logUnit').value;
-    if(unit === 'Lainnya') {
-        unit = document.getElementById('logUnitManual').value.trim();
-    }
+    if(unit === 'Lainnya') unit = document.getElementById('logUnitManual').value.trim();
 
     let masalah = document.getElementById('logMasalah').value.trim();
     let penyebab = document.getElementById('logPenyebab').value.trim();
@@ -1558,39 +1505,23 @@ function saveLogbook() {
     let mulai = document.getElementById('logMulai').value;
     let selesai = document.getElementById('logSelesai').value;
     let totalWaktu = document.getElementById('logTotalWaktu').value;
-    let hm = document.getElementById('logHourMeter').value || "-";
-    let gantiPart = document.getElementById('logGantiPart').value.trim() || "-";
-    let placement = document.getElementById('logPlacement').value.trim() || "-";
-    let subPlacement = document.getElementById('logSubPlacement').value.trim() || "-";
-    let statusPekerjaan = document.getElementById('logStatus').value;
     
     if(!tgl || !mesin || !unit || !masalah || !kategori || !mulai || !selesai) {
         return alert("Mohon lengkapi data Tanggal, Mesin, Unit, Kategori, Masalah, dan Waktu Pengerjaan!");
     }
 
     let logEntry = {
-        tanggal: tgl,
-        shift: shift,
-        mesin: mesin,
-        unit: unit,
-        masalah: masalah,
-        penyebab: penyebab,
-        kategori: kategori,
-        tindakan: tindakan,
-        mulai: mulai,
-        selesai: selesai,
-        durasi: totalWaktu,
-        hm: hm,
-        part: gantiPart,
-        placement: placement,
-        subPlace: subPlacement,
-        status: statusPekerjaan,
-        timestamp: new Date().toISOString()
+        tanggal: tgl, shift: shift, mesin: mesin, unit: unit, masalah: masalah,
+        penyebab: penyebab, kategori: kategori, tindakan: tindakan, mulai: mulai,
+        selesai: selesai, durasi: totalWaktu, hm: document.getElementById('logHourMeter').value || "-",
+        part: document.getElementById('logGantiPart').value.trim() || "-",
+        placement: document.getElementById('logPlacement').value.trim() || "-",
+        subPlace: document.getElementById('logSubPlacement').value.trim() || "-",
+        status: document.getElementById('logStatus').value, timestamp: new Date().toISOString()
     };
 
     logbookData.unshift(logEntry);
     syncToGoogleSheets("addLogbook", logEntry); 
-
     closeModal('addLogbookModal');
     renderLogbookTable();
     alert("Laporan Logbook berhasil disimpan dan dikirim!");
@@ -1600,7 +1531,6 @@ function renderLogbookTable() {
     const tbody = document.getElementById('db-logbook-body');
     if (!tbody) return;
     tbody.innerHTML = '';
-
     if(logbookData.length === 0) {
         tbody.innerHTML = `<tr><td colspan="16" style="text-align: center; color: #94a3b8; font-style: italic; padding: 20px;">Belum ada history perbaikan / data logbook...</td></tr>`;
         return;
@@ -1626,12 +1556,9 @@ function renderLogbookTable() {
                 <td>${log.placement}</td>
                 <td>${log.subPlace}</td>
                 <td style="text-align: center;">
-                    <span style="padding: 4px 10px; border-radius: 6px; font-size: 0.85em; font-weight: bold; background: ${statusBg}; color: white;">
-                        ${log.status}
-                    </span>
+                    <span style="padding: 4px 10px; border-radius: 6px; font-size: 0.85em; font-weight: bold; background: ${statusBg}; color: white;">${log.status}</span>
                 </td>
-            </tr>
-        `;
+            </tr>`;
     });
 }
 
@@ -1646,37 +1573,23 @@ function autoFillSho() {
 
 function saveSho() {
     let tgl = document.getElementById('shoTanggal').value;
-    let shiftAwal = document.getElementById('shoShift').value;
-    let shiftLanjut = document.getElementById('shoShiftNext').value;
     let tekAwal = document.getElementById('shoTeknisi').value.trim();
     let tekLanjut = document.getElementById('shoTeknisiNext').value.trim();
-    let finding = document.getElementById('shoFinding').value.trim();
-    let pending = document.getElementById('shoPending').value.trim();
-    let tools = document.getElementById('shoTools').value;
 
     if(!tgl || !tekAwal || !tekLanjut) return alert("Tanggal dan Nama Teknisi (Shift Selesai & Penerima) wajib diisi!");
 
     let shoEntry = {
-        tanggal: tgl,
-        shift: shiftAwal,
-        teknisi: tekAwal,            
-        shift_lanjut: shiftLanjut,
-        teknisi_lanjut: tekLanjut,  
-        finding: finding,
-        pending: pending,
-        tools: tools,
-        timestamp: new Date().toISOString()
+        tanggal: tgl, shift: document.getElementById('shoShift').value,
+        teknisi: tekAwal, shift_lanjut: document.getElementById('shoShiftNext').value,
+        teknisi_lanjut: tekLanjut, finding: document.getElementById('shoFinding').value.trim(),
+        pending: document.getElementById('shoPending').value.trim(),
+        tools: document.getElementById('shoTools').value, timestamp: new Date().toISOString()
     };
 
-    shoData = []; 
-    shoData.unshift(shoEntry); 
-
-    logbookData = []; 
-
+    shoData = []; shoData.unshift(shoEntry); logbookData = []; 
     syncToGoogleSheets("addSho", shoEntry); 
 
     closeModal('addShoModal');
-    
     renderShoTable();
     renderLogbookTable(); 
     
@@ -1693,9 +1606,7 @@ function renderShoTable() {
     }
     shoData.forEach(s => {
         let toolsColor = s.tools.includes('LENGKAP') ? 'var(--success)' : 'var(--danger)';
-        
         let htmlTeknisi = s.teknisi.replace(/\n/g, '<br>').replace(/\*/g, '');
-        
         tbody.innerHTML += `
             <tr>
                 <td>${s.tanggal} <br><strong>(Shift ${s.shift})</strong></td>
@@ -1703,8 +1614,7 @@ function renderShoTable() {
                 <td style="white-space: pre-line;">${s.finding}</td>
                 <td style="white-space: pre-line; color: var(--danger); font-weight: 500;">${s.pending}</td>
                 <td style="text-align: center; color:${toolsColor}; font-weight:bold;">${s.tools}</td>
-            </tr>
-        `;
+            </tr>`;
     });
 }
 
@@ -1718,8 +1628,7 @@ function initBreakdownFreq() {
             <div style="display:flex; flex-direction:column; align-items:center; padding: 15px; border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 8px; cursor: default;">
                 <span style="font-weight:bold; font-size: 1.1em; color: var(--text-dark);">${mac}</span>
                 <span style="color: var(--danger); font-size: 1.2em; font-weight: bold;" id="bd-count-${mac}">${breakdownFreq[mac]}x</span>
-            </div>
-        `;
+            </div>`;
     });
 }
 
@@ -1751,8 +1660,7 @@ function renderQualityTable() {
                         style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center; font-weight: bold; color: var(--purple);">
                 </td>
                 <td style="background: #f0fdf4; color: var(--success); font-weight: bold; font-size: 1.1em;" id="quality-res-${index}">${qualityVal}</td>
-            </tr>
-        `;
+            </tr>`;
     });
 }
 
@@ -1865,691 +1773,6 @@ function switchPage(pageId) {
         document.getElementById('topbar-title').innerText = "Analisa Historis & Reporting";
         initAnalisaPage();
     }
-}
-
-function openModal(modalId) { 
-    document.getElementById(modalId).classList.add('active'); 
-    if (modalId === 'addWoModal') {
-        let sel = document.getElementById('inputWoMachine');
-        sel.innerHTML = '<option value="">-- Pilih Mesin --</option>';
-        rawMachineList.forEach(id => {
-            sel.innerHTML += `<option value="${id}">${machineData[id].name}</option>`;
-        });
-        sel.innerHTML += '<option value="Lainnya">Lainnya (Ketik Manual)</option>';
-        
-        document.getElementById('inputWoMachineManual').style.display = 'none';
-        document.getElementById('inputWoMachineManual').value = '';
-        document.getElementById('inputWoDept').value = '';
-        document.getElementById('inputWoDeadline').value = '';
-        document.getElementById('inputWoDesc').value = '';
-
-    } else if (modalId === 'addLogbookModal') {
-        document.getElementById('logTanggal').valueAsDate = new Date();
-        
-        let selMesin = document.getElementById('logMesin');
-        selMesin.innerHTML = '';
-        rawMachineList.forEach(id => {
-            selMesin.innerHTML += `<option value="${id}">${id}</option>`;
-        });
-
-        let selUnit = document.getElementById('logUnit');
-        selUnit.innerHTML = '<option value="">-- Pilih Unit --</option>';
-        unitList.forEach(u => {
-            selUnit.innerHTML += `<option value="${u}">${u}</option>`;
-        });
-        selUnit.innerHTML += '<option value="Lainnya">Lainnya (Ketik Manual)</option>';
-        
-        document.getElementById('logUnitManual').style.display = 'none';
-        document.getElementById('logUnitManual').value = '';
-
-        document.getElementById('logMasalah').value = '';
-        document.getElementById('logPenyebab').value = '';
-        document.getElementById('logKategori').value = '';
-        document.getElementById('logTindakan').value = '';
-        document.getElementById('logMulai').value = '';
-        document.getElementById('logSelesai').value = '';
-        document.getElementById('logTotalWaktu').value = '';
-        document.getElementById('logHourMeter').value = '';
-        document.getElementById('logGantiPart').value = '';
-        document.getElementById('logPlacement').value = '';
-        document.getElementById('logSubPlacement').value = '';
-    } else if (modalId === 'addShoModal') {
-        document.getElementById('shoTanggal').valueAsDate = new Date();
-        document.getElementById('shoTeknisi').value = '';
-        document.getElementById('shoTeknisiNext').value = ''; 
-        document.getElementById('shoTools').value = 'LENGKAP';
-        autoFillSho();
-    }
-}
-        
-function closeModal(modalId) { 
-    document.getElementById(modalId).classList.remove('active'); 
-    if(modalId === 'addMachineModal') {
-        document.getElementById('inputMachineId').value = '';
-        document.getElementById('inputMachineName').value = '';
-        document.querySelectorAll('.process-check').forEach(cb => cb.checked = false);
-    } else if(modalId === 'addWoModal') {
-        document.getElementById('inputWoMachine').value = '';
-        document.getElementById('inputWoDesc').value = '';
-    }
-}
-
-function renderDatabaseTable() {
-    const tbody = document.getElementById('db-machine-body');
-    if (!tbody) return;
-    tbody.innerHTML = '';
-    rawMachineList.forEach(id => {
-        let mData = machineData[id];
-        let lifeBadgeClass = 'life-good';
-        if(mData.runningHours >= 950) lifeBadgeClass = 'life-danger';
-        else if(mData.runningHours >= 800) lifeBadgeClass = 'life-warn';
-
-        tbody.innerHTML += `<tr>
-            <td><strong>${id}</strong></td>
-            <td>${mData.name}</td>
-            <td>${mData.processes.join(', ')}</td>
-            <td style="text-align: center;">
-                <span class="life-badge ${lifeBadgeClass}">${mData.runningHours} Jam</span>
-            </td>
-            <td style="text-align: center;">
-                <button class="btn btn-danger" onclick="deleteMachine('${id}')"><i class="fa-solid fa-trash"></i></button>
-            </td>
-        </tr>`;
-    });
-}
-
-function saveNewMachine() {
-    let inputId = document.getElementById('inputMachineId').value.trim().toUpperCase();
-    let inputName = document.getElementById('inputMachineName').value.trim();
-    
-    if(!inputId || !inputName) return alert("ID Mesin dan Nama Mesin tidak boleh kosong!");
-    if(rawMachineList.includes(inputId)) return alert("Mesin ini sudah ada di database!");
-
-    let selectedProcesses = [];
-    document.querySelectorAll('.process-check:checked').forEach(cb => selectedProcesses.push(cb.value));
-    if(selectedProcesses.length === 0) return alert("Pilih minimal satu proses!");
-
-    let randomKw = parseFloat((Math.random() * 20 + 30).toFixed(2));
-
-    rawMachineList.unshift(inputId); 
-    breakdownFreq[inputId] = 0; 
-    machineData[inputId] = { 
-        name: inputName, 
-        processes: selectedProcesses, 
-        runningHours: 0,
-        currentProduct: "IDLE / TIDAK PRODUKSI",
-        lastProductBeforeBd: null,
-        powerKw: randomKw,
-        livePowerKw: 0, 
-        kwhShift: 0,    
-        costShift: 0,   
-        activeSecondsThisShift: 0, 
-        lastFB: undefined,
-        breakdown: {
-            isActive: false,
-            category: null,
-            startTime: null,
-            lockedElapsedSec: null, 
-            accumulated: { production: 0, maintenance: 0, ppic: 0 }
-        }
-    };
-    
-    refreshDashboardUI(); 
-    renderDatabaseTable(); 
-    if(document.getElementById('page-production').classList.contains('active')) renderProductionTable();
-    autoCheckWO(); 
-    closeModal('addMachineModal');
-}
-
-function deleteMachine(id) {
-    if(!confirm("Yakin ingin menghapus mesin " + id + "?")) return;
-    rawMachineList = rawMachineList.filter(m => m !== id); 
-    delete machineData[id];
-    delete breakdownFreq[id]; 
-    
-    if(currentMachine === id && rawMachineList.length > 0) currentMachine = rawMachineList[0];
-
-    workOrders.manual = workOrders.manual.filter(wo => wo.machine !== id);
-    workOrders.preventive = workOrders.preventive.filter(wo => wo.machine !== id);
-    workOrders.predictive = workOrders.predictive.filter(wo => wo.machine !== id);
-
-    refreshDashboardUI();
-    renderDatabaseTable();
-    renderWoUI();
-    if(document.getElementById('page-production').classList.contains('active')) renderProductionTable();
-}
-
-function refreshDashboardUI() {
-    if(document.getElementById('kpi-total')) document.getElementById('kpi-total').innerText = rawMachineList.length;
-
-    const selectElement = document.getElementById('machine-select');
-    if (selectElement) {
-        selectElement.innerHTML = '';
-        rawMachineList.forEach(id => {
-            selectElement.innerHTML += `<option value="${id}">${machineData[id].name}</option>`;
-        });
-    }
-    
-    if(rawMachineList.length > 0) {
-        if(!currentMachine || !rawMachineList.includes(currentMachine)) currentMachine = rawMachineList[0];
-        if (selectElement) selectElement.value = currentMachine;
-        
-        if (document.getElementById('display-machine-name')) document.getElementById('display-machine-name').innerText = currentMachine;
-        
-        let runHours = machineData[currentMachine].runningHours;
-        let dayColor = runHours >= 950 ? 'var(--danger)' : '#64748b';
-        if (document.getElementById('machine-run-days')) document.getElementById('machine-run-days').innerHTML = `(Telah beroperasi: <span style="color:${dayColor}; font-weight:bold;">${runHours} Jam</span>)`;
-        
-        if (document.getElementById('dash-shift-info')) document.getElementById('dash-shift-info').innerText = getCurrentShiftLabel();
-        
-        let isBd = machineData[currentMachine].breakdown.isActive || machineData[currentMachine].currentProduct.includes("BREAKDOWN");
-        let prod = isBd ? `BREAKDOWN (${machineData[currentMachine].currentProduct})` : machineData[currentMachine].currentProduct;
-        let prodEl = document.getElementById('dash-product-info');
-        if (prodEl) {
-            prodEl.innerText = prod;
-            if (prod.includes("IDLE") || isBd) {
-                prodEl.style.color = 'var(--danger)';
-            } else {
-                prodEl.style.color = 'var(--success)';
-            }
-        }
-
-    } else {
-        currentMachine = "";
-        if (document.getElementById('display-machine-name')) document.getElementById('display-machine-name').innerText = "-";
-        if (document.getElementById('machine-run-days')) document.getElementById('machine-run-days').innerText = "";
-        if (document.getElementById('dash-product-info')) document.getElementById('dash-product-info').innerText = "-";
-    }
-    chartDataArus.fill(0); chartDataSuhu.fill(0); chartDataVib.fill(0);
-}
-
-function switchMachine() {
-    currentMachine = document.getElementById('machine-select').value;
-    refreshDashboardUI(); 
-    updateBreakdownUI(); 
-    updateTampilanUI();
-    fetchHistoryFromLocal(currentMachine);
-}
-
-let trendChart;
-const maxDataPoints = 15; 
-let timeLabels = Array(maxDataPoints).fill('');
-let chartDataArus = Array(maxDataPoints).fill(0);
-let chartDataSuhu = Array(maxDataPoints).fill(0);
-let chartDataVib = Array(maxDataPoints).fill(0);
-
-function initChart() {
-    const ctx = document.getElementById('trendChart');
-    if (!ctx) return;
-    trendChart = new Chart(ctx.getContext('2d'), {
-        type: 'line',
-        data: {
-            labels: timeLabels,
-            datasets: [
-                { label: 'Suhu Avg (°C)', borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', data: chartDataSuhu, tension: 0.4, fill: true, borderWidth: 2, pointRadius: 0, yAxisID: 'y' },
-                { label: 'Arus Avg (A)', borderColor: '#3b82f6', backgroundColor: 'transparent', data: chartDataArus, tension: 0.4, borderWidth: 2, pointRadius: 0, yAxisID: 'y' },
-                { label: 'Vibrasi Avg (mm/s)', borderColor: '#8b5cf6', backgroundColor: 'transparent', data: chartDataVib, tension: 0.4, borderWidth: 2, pointRadius: 0, borderDash: [5, 5], yAxisID: 'y1' }
-            ]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false, animation: { duration: 0 },
-            plugins: { legend: { position: 'top' } },
-            scales: {
-                y: { type: 'linear', position: 'left', min: 0, max: 100, grid: { borderDash: [5, 5] } },
-                y1: { type: 'linear', position: 'right', min: 0, max: 5, grid: { display: false } },
-                x: { grid: { display: false } }
-            }
-        }
-    });
-    initBreakdownChart(); 
-}
-
-function getRandom(min, max) { return parseFloat((Math.random() * (max - min) + min).toFixed(2)); }
-function getStatusClass(val, type) {
-    if (type === 'temp') return val < 50 ? 'status-good' : (val < 65 ? 'status-warn' : 'status-danger');
-    if (type === 'vib') return val < 1.5 ? 'status-good' : (val < 2.5 ? 'status-warn' : 'status-danger');
-    return 'status-good';
-}
-
-function liveUpdateDashboard() {
-    if(document.getElementById('dash-shift-info')) {
-        document.getElementById('dash-shift-info').innerText = getCurrentShiftLabel();
-    }
-
-    if(document.getElementById('page-dashboard').classList.contains('active') === false && document.getElementById('page-tampilan').classList.contains('active') === false) return;
-
-    let now = new Date();
-    let timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0') + ':' + now.getSeconds().toString().padStart(2, '0');
-
-    if(document.getElementById('page-dashboard').classList.contains('active') && currentMachine) {
-        const tbody = document.getElementById('table-body');
-        tbody.innerHTML = '';
-        
-        let totalArus = 0, totalSuhu = 0, totalVib = 0;
-        const processes = machineData[currentMachine].processes;
-        
-        let isIdle = (machineData[currentMachine].currentProduct.includes("IDLE") || machineData[currentMachine].currentProduct.includes("BELUM ADA JADWAL") || machineData[currentMachine].breakdown.isActive);
-
-        processes.forEach(process => {
-            let freq = isIdle ? 0 : getRandom(48.5, 50.5);
-            let current = isIdle ? 0 : getRandom(4.0, 15.0);
-            let temp = isIdle ? getRandom(28.0, 32.0) : getRandom(38.0, 68.0); 
-            let vib = isIdle ? 0 : getRandom(0.5, 2.8);
-            
-            let lifeHours = getProcessRemainingLife(currentMachine, process);
-            let lifeBadgeClass = 'life-good';
-            if (lifeHours <= 50) lifeBadgeClass = 'life-danger';
-            else if (lifeHours <= 150) lifeBadgeClass = 'life-warn';
-
-            totalArus += current; totalSuhu += temp; totalVib += vib;
-
-            let row = `<tr>
-                <td><strong>${process}</strong></td>
-                <td class="status-good">${freq}</td>
-                <td class="status-good">${current}</td>
-                <td class="${getStatusClass(temp, 'temp')}">${temp}</td>
-                <td class="${getStatusClass(vib, 'vib')}">${vib}</td>
-                <td><span class="life-badge ${lifeBadgeClass}">${lifeHours} Jam</span></td>
-            </tr>`;
-            tbody.innerHTML += row;
-        });
-
-        let avgArus = totalArus / processes.length;
-        let avgSuhu = totalSuhu / processes.length;
-        let avgVib = totalVib / processes.length;
-        
-        timeLabels.shift(); timeLabels.push(timeStr);
-        chartDataArus.shift(); chartDataArus.push(avgArus);
-        chartDataSuhu.shift(); chartDataSuhu.push(avgSuhu);
-        chartDataVib.shift(); chartDataVib.push(avgVib); 
-
-        trendChart.update();
-    }
-
-    if(document.getElementById('page-tampilan').classList.contains('active') && currentMachine) {
-        let tData = machineData[currentMachine];
-        let tIsIdle = tData.currentProduct.includes("IDLE") || tData.currentProduct.includes("BELUM ADA JADWAL") || tData.breakdown.isActive;
-        let idealSpeedVal = 0;
-        
-        if(!tIsIdle && typeof dataProduksi !== 'undefined') {
-            let pDetail = dataProduksi.find(item => item["NAMA MESIN"] === currentMachine && item["NAMA PRODUK"].trim() === tData.currentProduct.trim());
-            if(pDetail && pDetail["IDEAL SPEED"]) idealSpeedVal = parseFloat(pDetail["IDEAL SPEED"]);
-        }
-        
-        let curSpeed = 0;
-        
-        if (realtimeDBData[currentMachine] && realtimeDBData[currentMachine].speed !== undefined) {
-            curSpeed = parseFloat(realtimeDBData[currentMachine].speed);
-        } else {
-            curSpeed = tIsIdle ? 0 : getRandom(idealSpeedVal * 0.95, idealSpeedVal * 1.05);
-            if(!tIsIdle && idealSpeedVal === 0) curSpeed = getRandom(80, 100); 
-        }
-
-        document.getElementById('tampilan-kecepatan').innerText = curSpeed.toFixed(1) + " m/min";
-        
-        if (tampilanTimeLabels.length > 1000) {
-            tampilanTimeLabels.shift();
-            tampilanSpeedData.shift();
-        }
-
-        tampilanTimeLabels.push(timeStr);
-        tampilanSpeedData.push(curSpeed);
-        
-        if (isLiveView) {
-            tampilanSpeedChartInstance.options.scales.x.min = Math.max(0, tampilanTimeLabels.length - 20);
-            tampilanSpeedChartInstance.options.scales.x.max = tampilanTimeLabels.length - 1;
-            let btn = document.getElementById('btnLiveView');
-            if (btn) btn.style.display = 'none';
-        } else {
-            let btn = document.getElementById('btnLiveView');
-            if (btn) btn.style.display = 'inline-flex';
-        }
-
-        tampilanSpeedChartInstance.update();
-    }
-}
-
-/* FUNGSI UNTUK KALKULASI DATA OEE & SCHEDULE */
-function initSchedulePage() {
-    if(typeof dataProduksi === 'undefined') {
-        console.warn("File dataProduksi.js belum ditemukan atau belum dimuat!");
-        return;
-    }
-
-    let machines = [...new Set(dataProduksi.map(item => item["NAMA MESIN"]))];
-    
-    let selMac = document.getElementById('schedMachine');
-    if (!selMac) return;
-    selMac.innerHTML = '';
-    machines.forEach(m => {
-        selMac.innerHTML += `<option value="${m}">${m}</option>`;
-    });
-
-    document.getElementById('schedTglInput').value = getFactoryDateIso();
-    document.getElementById('schedShiftInput').value = getCurrentShiftInfo();
-
-    updateScheduleProducts();
-}
-
-function updateScheduleProducts() {
-    let mac = document.getElementById('schedMachine').value;
-    let prods = dataProduksi.filter(item => item["NAMA MESIN"] === mac);
-    
-    let selProd = document.getElementById('schedProduct');
-    selProd.innerHTML = '';
-    prods.forEach(p => {
-        selProd.innerHTML += `<option value="${p["NAMA PRODUK"]}">${p["NAMA PRODUK"]}</option>`;
-    });
-
-    selProd.innerHTML += `<option value="Lainnya">-- Lainnya (Ketik Manual) --</option>`;
-
-    if (!document.getElementById('schedProductManual')) {
-        let inputManual = document.createElement('input');
-        inputManual.type = 'text';
-        inputManual.id = 'schedProductManual';
-        inputManual.placeholder = 'Ketik Nama Produk Baru...';
-        inputManual.style.display = 'none';
-        inputManual.style.marginTop = '10px';
-        inputManual.style.width = '100%';
-        inputManual.style.padding = '10px';
-        inputManual.style.border = '1px solid #cbd5e1';
-        inputManual.style.borderRadius = '6px';
-        inputManual.style.outline = 'none';
-        selProd.parentNode.appendChild(inputManual);
-    }
-
-    updateScheduleDetails();
-}
-
-function updateScheduleDetails() {
-    let mac = document.getElementById('schedMachine').value;
-    let prodName = document.getElementById('schedProduct').value;
-    let manualInput = document.getElementById('schedProductManual');
-    
-    let kodeMatEl = document.getElementById('schedKodeMat');
-    let lebarEl = document.getElementById('schedLebar');
-    
-    if (prodName === 'Lainnya') {
-        if(manualInput) {
-            manualInput.style.display = 'block';
-            manualInput.value = ''; 
-        }
-        
-        kodeMatEl.disabled = false;
-        kodeMatEl.value = "";
-        kodeMatEl.style.backgroundColor = "#ffffff";
-        kodeMatEl.placeholder = "Ketik Kode Material...";
-        
-        lebarEl.disabled = false;
-        lebarEl.value = "";
-        lebarEl.style.backgroundColor = "#ffffff";
-        lebarEl.placeholder = "Ketik Lebar Jumbo...";
-        
-        document.getElementById('schedT100').innerText = "0";
-        document.getElementById('schedT70').innerText = "0";
-        document.getElementById('schedSpeed').innerText = "0";
-    } else {
-        if(manualInput) manualInput.style.display = 'none';
-        
-        kodeMatEl.disabled = true;
-        kodeMatEl.style.backgroundColor = "#f8fafc";
-        kodeMatEl.placeholder = "";
-        
-        lebarEl.disabled = true;
-        lebarEl.style.backgroundColor = "#f8fafc";
-        lebarEl.placeholder = "";
-
-        let detail = dataProduksi.find(item => item["NAMA MESIN"] === mac && item["NAMA PRODUK"] === prodName);
-        if(detail) {
-            kodeMatEl.value = detail["KODE MATERIAL FG NEW"] || "-";
-            lebarEl.value = detail["LEBAR JUMBO (CM)"] || "-";
-            
-            document.getElementById('schedT100').innerText = detail["TARGET 100% (CRT)"] || "0";
-            document.getElementById('schedT70').innerText = detail["TARGET 70% (CRT)"] || "0";
-            
-            let speed = parseFloat(detail["IDEAL SPEED"]);
-            document.getElementById('schedSpeed').innerText = isNaN(speed) ? "-" : speed.toFixed(3);
-        }
-    }
-}
-
-function calculateAndAddSchedule() {
-    let tglVal = document.getElementById('schedTglInput').value;
-    if(!tglVal) return alert("Tanggal wajib diisi!");
-    
-    let dateObj = new Date(tglVal);
-    let bulanArr = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
-    let bulanStr = bulanArr[dateObj.getMonth()];
-    let tglStr = dateObj.getDate().toString().padStart(2, '0');
-
-    let shiftFull = document.getElementById('schedShiftInput').value;
-    let shiftVal = shiftFull.includes("1") ? "Shift 1" : (shiftFull.includes("2") ? "Shift 2" : "Shift 3");
-    
-    let target100 = parseFloat(document.getElementById('schedT100').innerText) || 0;
-    let target70 = parseFloat(document.getElementById('schedT70').innerText) || 0;
-    let idealSpeed = parseFloat(document.getElementById('schedSpeed').innerText) || 0;
-    
-    let mesin = document.getElementById('schedMachine').value;
-    let produk = document.getElementById('schedProduct').value;
-    
-    if (produk === 'Lainnya') {
-        let manualInput = document.getElementById('schedProductManual');
-        produk = manualInput ? manualInput.value.trim() : "";
-        if (!produk) return alert("Silakan ketik nama produk baru secara manual!");
-    }
-    
-    let kodeMat = document.getElementById('schedKodeMat').value || "-";
-    let lebar = document.getElementById('schedLebar').value || "-";
-
-    let exists = scheduleDataList.find(s => s.tglFull === tglVal && s.shift === shiftVal && s.mesin === mesin && s.produk === produk);
-    if(exists) return alert(`Penjadwalan untuk Mesin ${mesin} dengan produk ${produk} pada Tanggal ${tglVal} ${shiftVal} sudah ada!`);
-
-    let existingCount = scheduleDataList.filter(s => s.tglFull === tglVal && s.shift === shiftVal && s.mesin === mesin).length;
-    let isFirst = (existingCount === 0);
-
-    let initialActual = 0;
-    let workingTime = 480; 
-
-    let newEntry = {
-        idJadwal: Date.now(),
-        tglFull: tglVal,
-        bulan: bulanStr,
-        tgl: tglStr,
-        shift: shiftVal,
-        wt: workingTime,
-        mesin: mesin,
-        produk: produk,
-        lebar: lebar,
-        t100: target100,
-        t70: target70,
-        speed: idealSpeed.toFixed(3),
-        isFirst: isFirst, 
-        
-        actual: initialActual,
-        dtProd: 0,
-        dtMtc: 0,
-        dtPpic: 0,
-        
-        eff: '0.00%',
-        dtTotal: 0,
-        pDtMtc: '0.00%',
-        pDtAll: '0.00%',
-        opTime: workingTime,
-        availTime: workingTime,
-        availMachine: '100.00%',
-        perf: '0.00%',
-        oee: '0.00%',
-        
-        kwh: 0,
-        costListrik: 0,
-        
-        accProduk: '',
-        quality: '0.00%'
-    };
-
-    scheduleDataList.push(newEntry);
-    
-    fetch('https://cmms-2c23c-default-rtdb.asia-southeast1.firebasedatabase.app//schedules.json', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newEntry)
-    })
-    .then(res => res.json())
-    .then(dataFB => {
-        newEntry.firebaseKey = dataFB.name; 
-    })
-    .catch(err => console.error(err));
-
-    let mData = machineData[mesin];
-    if(mData && (mData.currentProduct.includes("IDLE") || mData.currentProduct.includes("BELUM ADA JADWAL"))) {
-        mData.currentProduct = produk.trim();
-    }
-
-    if(document.getElementById('page-schedule').classList.contains('active')) renderScheduleTable();
-    updateScheduleMaintenanceStats();
-    
-    alert(`Jadwal Produksi ${mesin} berhasil ditambahkan! Data OEE akan terhitung Realtime sesuai Shift.`);
-}
-
-function updateScheduleInline(index, field, value) {
-    let sched = scheduleDataList[index];
-    if (!sched) return;
-
-    let mac = sched.mesin;
-    let mData = machineData[mac];
-    let isCurrentlyRunning = (mData && mData.currentProduct.trim() === sched.produk.trim());
-
-    if (field === 'wt' || field === 't100' || field === 't70' || field === 'actual' || field === 'speed') {
-        sched[field] = parseFloat(value) || 0;
-    } else {
-        sched[field] = value;
-    }
-
-    if (field === 'produk' && isCurrentlyRunning) {
-        mData.currentProduct = value.trim();
-        
-        fetch(`https://cmms-2c23c-default-rtdb.asia-southeast1.firebasedatabase.app//active_runs/${mac}.json`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                machine: mac,
-                product: value.trim(),
-                timestamp: Date.now()
-            })
-        }).catch(e => console.error(e));
-    }
-
-    if (sched.firebaseKey && !isResettingSchedule) {
-        let payload = {};
-        payload[field] = sched[field];
-        fetch(`https://cmms-2c23c-default-rtdb.asia-southeast1.firebasedatabase.app//schedules/${sched.firebaseKey}.json`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        }).catch(e => console.error("Gagal update data jadwal:", e));
-    }
-
-    if(field === 'actual') {
-         if(machineData[mac]) {
-             machineData[mac].lastFB = (realtimeDBData[mac] && realtimeDBData[mac].actual !== undefined) ? realtimeDBData[mac].actual : 0;
-         }
-    }
-    
-    if(document.getElementById('page-schedule-maintenance').classList.contains('active')) {
-        renderQualityTable();
-    }
-    if(document.getElementById('page-tampilan').classList.contains('active')) {
-        updateTampilanUI(); 
-    }
-}
-
-function renderScheduleTable() {
-    let tbody = document.getElementById('db-schedule-body');
-    if (!tbody) return;
-    tbody.innerHTML = '';
-    
-    if(scheduleDataList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="25" style="text-align: center; color: #94a3b8; font-style: italic; padding: 20px;">Belum ada jadwal produksi yang ditambahkan...</td></tr>`;
-        return;
-    }
-
-    let currentTglIso = getFactoryDateIso();
-
-    let machineSchedCount = {};
-    scheduleDataList.forEach(s => {
-        if (s.tglFull === currentTglIso && s.shift === currentActiveShift) {
-            machineSchedCount[s.mesin] = (machineSchedCount[s.mesin] || 0) + 1;
-        }
-    });
-
-    scheduleDataList.forEach((d, index) => {
-        let mData = machineData[d.mesin];
-        
-        let isCurrentSchedule = (d.tglFull === currentTglIso && d.shift === currentActiveShift);
-        let isRunning = (mData && mData.currentProduct.trim() === d.produk.trim()) ? 'checked' : '';
-        
-        let radioTitle = isCurrentSchedule ? 'title="Pilih untuk set mesin menjalankan produk ini"' : 'title="Hanya bisa dipilih pada hari & shift yang sesuai"';
-        let selectorHtml = '';
-
-        if (isCurrentSchedule) {
-            if (machineSchedCount[d.mesin] > 1) {
-                selectorHtml = `<input type="radio" name="run_machine_${d.mesin}" class="run-radio" ${isRunning} ${radioTitle} onchange="setRunningProduct(${index})">`;
-            } else {
-                selectorHtml = `<input type="radio" class="run-radio" checked disabled title="Otomatis berjalan karena hanya 1 produk pada shift ini">`;
-            }
-        } else {
-            selectorHtml = `<input type="radio" disabled title="Hanya bisa dipilih pada hari & shift yang sesuai">`;
-        }
-
-        let inputStyle = 'width: 100%; border: none; background: transparent; text-align: center; font-weight: inherit; color: inherit; font-size: inherit; font-family: inherit; outline: none; border-bottom: 1px dashed rgba(0,0,0,0.3); cursor: text; padding: 2px 0;';
-
-        let wtInput = `<input type="number" value="${d.wt}" onchange="updateScheduleInline(${index}, 'wt', this.value)" style="${inputStyle} width: 60px;">`;
-        let produkInput = `<input type="text" value="${d.produk}" onchange="updateScheduleInline(${index}, 'produk', this.value)" style="${inputStyle} text-align: left; width: 100%; min-width: 120px;">`;
-        let lebarInput = `<input type="text" value="${d.lebar}" onchange="updateScheduleInline(${index}, 'lebar', this.value)" style="${inputStyle} width: 60px;">`;
-        let t100Input = `<input type="number" value="${d.t100}" onchange="updateScheduleInline(${index}, 't100', this.value)" style="${inputStyle} width: 60px;">`;
-        let t70Input = `<input type="number" value="${d.t70}" onchange="updateScheduleInline(${index}, 't70', this.value)" style="${inputStyle} width: 60px;">`;
-        let actualInput = `<input type="number" id="sched-actual-${index}" value="${d.actual}" onchange="updateScheduleInline(${index}, 'actual', this.value)" style="${inputStyle} width: 60px; color: red;">`;
-        let speedInput = `<input type="number" step="0.001" id="sched-speed-${index}" value="${d.speed}" onchange="updateScheduleInline(${index}, 'speed', this.value)" style="${inputStyle} width: 60px; color: #0284c7;">`;
-
-        let costDisplay = `<div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
-            <i class="fa-solid fa-bolt" style="color: #f59e0b; filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.4)); font-size: 1.1em;"></i>
-            <span style="letter-spacing: 0.5px;">${d.costListrik !== undefined ? formatRupiah(d.costListrik) : 'Rp 0'}</span>
-        </div>`;
-
-        tbody.innerHTML += `
-            <tr>   
-                <td style="text-align: center; vertical-align: middle; width: 60px;">
-                    ${selectorHtml}
-                </td>
-                <td><strong>${d.bulan}</strong></td>
-                <td><strong>${d.tgl}</strong></td>
-                <td style="color:#64748b; font-weight:bold;">${d.shift}</td>
-                <td style="color:red; font-weight:bold;">${wtInput}</td>
-                <td style="color:blue; font-weight:bold;">${d.mesin}</td>
-                <td style="color:blue; font-weight:bold;">${produkInput}</td>
-                <td style="background:#dcfce7; color:#047857; font-weight:bold;">${lebarInput}</td>
-                <td style="color:blue; font-weight:bold; font-style:italic;">${t100Input}</td>
-                <td style="color:blue; font-weight:bold; font-style:italic;">${t70Input}</td>
-                <td style="background:#fee2e2; font-weight:bold; font-size: 1.1em; padding: 5px;">${actualInput}</td>
-                <td style="background:#e0f2fe; color:blue; font-weight:bold; font-size:1.1em;" id="sched-eff-${index}">${d.eff}</td>
-                <td style="color:#d946ef; font-weight:bold;" id="sched-dtprod-${index}">${d.dtProd}</td>
-                <td style="color:#d946ef; font-weight:bold;" id="sched-dtmtc-${index}">${d.dtMtc}</td>
-                <td style="color:#d946ef; font-weight:bold;" id="sched-dtppic-${index}">${d.dtPpic}</td>
-                <td style="color:red; font-weight:bold;" id="sched-dttotal-${index}">${d.dtTotal}</td>
-                <td style="color:red; font-weight:bold;" id="sched-pdtmtc-${index}">${d.pDtMtc}</td>
-                <td style="color:red; font-weight:bold;" id="sched-pdtall-${index}">${d.pDtAll}</td>
-                <td style="color:red; font-weight:bold;" id="sched-optime-${index}">${d.opTime}</td>
-                <td style="color:red; font-weight:bold;" id="sched-availtime-${index}">${d.availTime}</td>
-                <td style="color:#0284c7; font-weight:bold;">${speedInput}</td>
-                <td style="color:red; font-weight:bold;" id="sched-availm-${index}">${d.availMachine}</td>
-                <td style="background:#fef08a; color:#b45309; font-weight:bold;" id="sched-perf-${index}">${d.perf}</td>
-                <td style="background:#fef08a; color:#b45309; font-weight:bold; font-size:1.1em;" id="sched-oee-${index}">${d.oee}</td>
-                <td style="background: linear-gradient(135deg, #dcfce7, #bbf7d0); color: #065f46; font-weight: 800; font-size: 1.15em; box-shadow: inset 0 0 5px rgba(0,0,0,0.05); border-radius: 6px; border: 1px solid #86efac; text-align: center;" id="sched-cost-${index}">
-                    ${costDisplay}
-                </td>
-            </tr>
-        `;
-    });
 }
 
 // ==========================================
@@ -2958,7 +2181,9 @@ window.onload = () => {
     // Inisialisasi awal tarik data dari Firebase 
     fetchSchedulesFromFirebase();
     fetchActiveRunsFromFirebase();
-    fetchBreakdownStatesFromFirebase();
+    
+    // Diisi di callback akhirnya fetchSchedulesFromFirebase
+    // fetchBreakdownStatesFromFirebase();
 
     setInterval(updateRealtimeClock, 1000);
     setInterval(liveUpdateDashboard, 2000); 
