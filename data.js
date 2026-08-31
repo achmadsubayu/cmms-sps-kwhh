@@ -1,35 +1,33 @@
 // VARIABLE GLOBAL SHIFT UNTUK TRACKING PERUBAHAN
 let currentActiveShift = "";
-let isResettingSchedule = false; // FLAG PENGUNCI AGAR TIDAK BENTROK SAAT RESET
-let lastPollTime = Date.now(); // KUNCI ANTI-GHOST UNTUK TAB TERTIDUR
+let isResettingSchedule = false; 
+let lastPollTime = Date.now(); 
 
 // --- UBAHAN: TARIF KWH MENJADI AKTUAL RP 1500 ---
 const tarifKwh = 1500; 
-const tarifListrikPerDetik = tarifKwh / 3600; // Rp 0.4166666... per detik
-// ---------------------------
+const tarifListrikPerDetik = tarifKwh / 3600; 
 
-// --- FUNGSI MUTLAK: TANGGAL PABRIK (FACTORY DATE) ---
-// Memastikan Shift 3 (23:00 - 07:00) yang melewati tengah malam
-// TETAP dihitung sebagai jadwal produksi hari sebelumnya!
+// PENGAMANAN VARIABEL GLOBAL AGAR TIDAK CRASH (Mencegah ReferenceError)
+let MACHINES = typeof rawMachineList !== 'undefined' ? rawMachineList : ["NP313", "FC122", "TW408", "JRT06", "HRT02", "TL01"];
+let PRODUCTS = typeof productList !== 'undefined' ? productList : ["Brand SPS Facial 2 Ply", "Brand SPS Napkin Regular", "Jumbo Roll Premium SP", "Towel Multipurpose SPS"];
+let POWERS = typeof powerData !== 'undefined' ? powerData : {"MAIN_FACTORY": 1200, "NP313": 45.5, "FC122": 38.2};
+let UNITS = typeof unitList !== 'undefined' ? unitList : ["Motor Unwinder", "Cylinder Emboss", "Folding Blade", "Logsaw Blade Belt", "Pneumatic Valve"];
+
 function getFactoryDateIso(dateObj) {
     let d = dateObj ? new Date(dateObj) : new Date();
     let hour = d.getHours();
     
     if (hour < 7) {
-        // Jika masih di bawah jam 07:00 pagi, ini masuk hitungan produksi kemarin
         let prevDay = new Date(d.getTime());
         prevDay.setDate(prevDay.getDate() - 1);
         let tzOffset = prevDay.getTimezoneOffset() * 60000;
         return (new Date(prevDay.getTime() - tzOffset)).toISOString().slice(0, 10);
     } else {
-        // Jika di atas jam 07:00 pagi, masuk hitungan produksi hari ini
         let tzOffset = d.getTimezoneOffset() * 60000;
         return (new Date(d.getTime() - tzOffset)).toISOString().slice(0, 10);
     }
 }
-// ----------------------------------------------------
 
-// FUNGSI JAM REALTIME WIB
 function updateRealtimeClock() {
     let now = new Date();
     let options = { timeZone: 'Asia/Jakarta', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' };
@@ -61,8 +59,6 @@ function syncToGoogleSheets(actionName, dataObj) {
         })
         .then(response => console.log(`[GOOGLE SHEETS] Sukses kirim action: ${actionName}`))
         .catch(error => console.error('[GOOGLE SHEETS ERROR]', error));
-    } else {
-        console.log("[GOOGLE SHEETS] Melewati proses kirim karena URL Script belum diatur.");
     }
 }
 
@@ -76,18 +72,14 @@ let logbookData = [];
 let shoData = [];
 let scheduleDataList = [];
 
-// Variabel untuk menyimpan count breakdown maintenance otomatis
 let breakdownFreq = {};
 
-// --- TAMBAHAN: Variabel Global untuk Chart Tampilan ---
 let tampilanSpeedChartInstance;
 let tampilanDtChartInstance;
 let tampilanTimeLabels = [];
 let tampilanSpeedData = [];
-let isLiveView = true; // Flag untuk tracking status Live view auto-scroll sumbu X
-// --------------------------------------------------------
+let isLiveView = true; 
 
-// Array Global Untuk Menampung Semua Riwayat Breakdown
 let allBreakdownEvents = [];
 
 function fetchHistoryFromLocal(machineId) {
@@ -110,7 +102,7 @@ function fetchHistoryFromLocal(machineId) {
                     tampilanSpeedChartInstance.options.scales.x.min = Math.max(0, tampilanTimeLabels.length - 20);
                     tampilanSpeedChartInstance.options.scales.x.max = tampilanTimeLabels.length - 1;
                 }
-                tampilanSpeedChartInstance.update('none'); // Update tanpa animasi
+                tampilanSpeedChartInstance.update('none'); 
             }
         } else {
             tampilanTimeLabels = [];
@@ -165,7 +157,7 @@ function downloadSpeedHistory() {
         
     }).catch(e => {
         console.error(e);
-        alert("Gagal mengunduh data. Pastikan API Lokal InfluxDB menyala (node server.js).");
+        alert("Gagal mengunduh data. Pastikan API Lokal InfluxDB menyala.");
     });
 }
 
@@ -181,7 +173,6 @@ function resetLiveView() {
     }
 }
 
-// --- FIREBASE RTDB AUTO BREAKDOWN ---
 const firebaseUrlRT = 'https://cmms-2c23c-default-rtdb.asia-southeast1.firebasedatabase.app//speed_mesin.json';        
         
 let realtimeDBData = {};
@@ -205,7 +196,7 @@ function fetchSchedulesFromFirebase() {
             scheduleDataList = validSchedules;
             
             let currentTglIso = getFactoryDateIso();
-            rawMachineList.forEach(id => {
+            MACHINES.forEach(id => {
                 let mData = machineData[id];
                 if(mData && mData.currentProduct.includes("IDLE")) {
                     let sched = scheduleDataList.find(s => s.mesin === id && s.tglFull === currentTglIso && s.shift === currentActiveShift);
@@ -213,10 +204,11 @@ function fetchSchedulesFromFirebase() {
                 }
             });
         }
+        // Aman dari error promise lama
+        fetchBreakdownStatesFromFirebase();
     })
-    .catch(e => { console.error("Error fetch schedules:", e); })
-    .finally(() => {
-        // PERBAIKAN MUTLAK: Wajib memanggil fetch breakdown agar state mesin ikut tersinkronisasi!
+    .catch(e => { 
+        console.error("Error fetch schedules:", e); 
         fetchBreakdownStatesFromFirebase();
     });
 }
@@ -334,7 +326,7 @@ function updateDowntimeBadge() {
     let pendingCount = 0;
     let currentTglIso = getFactoryDateIso();
 
-    rawMachineList.forEach(id => {
+    MACHINES.forEach(id => {
         let mData = machineData[id];
         let activeSched = scheduleDataList.find(s => 
             s.mesin === id && 
@@ -395,7 +387,7 @@ function pollRealtimeData() {
     lastPollTime = nowTime;
 
     if (isAsleep) {
-        console.warn("[SYSTEM] Tab terdeteksi sempat tertidur (background sleep). Sinkronisasi ulang data mutlak...");
+        console.warn("[SYSTEM] Tab terdeteksi sempat tertidur. Sinkronisasi ulang...");
         fetchSchedulesFromFirebase();
         return; 
     }
@@ -431,7 +423,7 @@ function pollRealtimeData() {
             let flag = flags[mac];
             if (mData && mData.breakdown.isActive && mData.breakdown.category === "AUTO-PENDING") {
                 if (flag.timestamp > mData.breakdown.startTime.getTime()) {
-                    console.log(`[SYNC] Mesin ${mac} telah dikategorikan oleh backend/perangkat lain.`);
+                    console.log(`[SYNC] Mesin ${mac} dikategorikan oleh backend.`);
                     applySilentBreakdownResolution(mac, flag.category);
                 }
             }
@@ -441,7 +433,7 @@ function pollRealtimeData() {
     fetchWaitingResolution(); 
     updateDowntimeBadge();
     
-    // Panggil untuk mengupdate indikator visual UI agar responsif seketika
+    // VISUAL INSTANT UPDATE
     refreshDashboardUI();
     if(document.getElementById('page-tampilan').classList.contains('active')) updateTampilanUI();
 }
@@ -516,11 +508,6 @@ function toggleSidebar() {
     overlay.classList.toggle('show');
 }
 
-if (typeof rawMachineList === 'undefined') { window.rawMachineList = ["NP313", "FC122", "TW408", "JRT06", "HRT02", "TL01"]; }
-if (typeof productList === 'undefined') { window.productList = ["Brand SPS Facial 2 Ply", "Brand SPS Napkin Regular", "Jumbo Roll Premium SP", "Towel Multipurpose SPS"]; }
-if (typeof powerData === 'undefined') { window.powerData = {"MAIN_FACTORY": 1200, "NP313": 45.5, "FC122": 38.2}; }
-if (typeof unitList === 'undefined') { window.unitList = ["Motor Unwinder", "Cylinder Emboss", "Folding Blade", "Logsaw Blade Belt", "Pneumatic Valve"]; }
-
 function getCurrentShiftInfo(dateObj) {
     let d = dateObj ? new Date(dateObj) : new Date();
     let hour = d.getHours();
@@ -537,7 +524,7 @@ function getCurrentShiftLabel() {
 }
 
 function buildInitialMachineData() {
-    rawMachineList.forEach(m => {
+    MACHINES.forEach(m => {
         let id = m.toUpperCase();
         let proc = [];
         let fullName = "Line " + id;
@@ -565,7 +552,7 @@ function buildInitialMachineData() {
         let initialRunHours = (charCodeSum * 25) % 1050; 
         
         let randomProduct = "IDLE / BELUM ADA JADWAL"; 
-        let powerKw = powerData[id] || (Math.random() * 20 + 30).toFixed(2);
+        let powerKw = POWERS[id] || (Math.random() * 20 + 30).toFixed(2);
 
         machineData[id] = { 
             name: fullName, 
@@ -641,6 +628,8 @@ function updateBreakdownUI() {
     if(!document.getElementById('page-kpi-oee').classList.contains('active')) return;
 
     let mData = machineData[currentMachine];
+    if (!mData) return;
+    
     let bd = mData.breakdown;
     document.getElementById('bd-spesific-name').innerText = mData.name;
 
@@ -720,8 +709,9 @@ setInterval(() => {
 }, 1000);
 
 function initBreakdownChart() {
-    const ctx = document.getElementById('breakdownChart').getContext('2d');
-    bdChartInstance = new Chart(ctx, {
+    const ctx = document.getElementById('breakdownChart');
+    if(!ctx) return;
+    bdChartInstance = new Chart(ctx.getContext('2d'), {
         type: 'doughnut',
         data: {
             labels: ['Production', 'Maintenance', 'PPIC'],
@@ -746,66 +736,69 @@ function updateBreakdownChart(prod, maint, ppic) {
 }
 
 function initTampilanCharts() {
-    const ctxSpeed = document.getElementById('tampilanSpeedChart').getContext('2d');
-    tampilanSpeedChartInstance = new Chart(ctxSpeed, {
-        type: 'line',
-        data: {
-            labels: tampilanTimeLabels,
-            datasets: [{
-                label: 'Speed Aktual (m/min)',
-                borderColor: '#10b981',
-                backgroundColor: 'rgba(16, 185, 129, 0.15)',
-                data: tampilanSpeedData,
-                tension: 0.4, fill: true, borderWidth: 3, pointRadius: 0
-            }]
-        },
-        options: {
-            responsive: true, 
-            maintainAspectRatio: false, 
-            animation: false, 
-            plugins: { 
-                legend: { display: false },
-                zoom: {
-                    pan: { 
-                        enabled: true, 
-                        mode: 'x',
-                        onPanComplete: function() {
-                            isLiveView = false;
-                            let btn = document.getElementById('btnLiveView');
-                            if(btn) btn.style.display = 'inline-flex';
-                        }
-                    },
-                    zoom: { 
-                        wheel: { enabled: true }, 
-                        pinch: { enabled: true }, 
-                        mode: 'x',
-                        onZoomComplete: function() {
-                            isLiveView = false;
-                            let btn = document.getElementById('btnLiveView');
-                            if(btn) btn.style.display = 'inline-flex';
+    const ctxSpeed = document.getElementById('tampilanSpeedChart');
+    if(ctxSpeed) {
+        tampilanSpeedChartInstance = new Chart(ctxSpeed.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: tampilanTimeLabels,
+                datasets: [{
+                    label: 'Speed Aktual (m/min)',
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                    data: tampilanSpeedData,
+                    tension: 0.4, fill: true, borderWidth: 3, pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true, 
+                maintainAspectRatio: false, 
+                animation: false, 
+                plugins: { 
+                    legend: { display: false },
+                    zoom: {
+                        pan: { 
+                            enabled: true, mode: 'x',
+                            onPanComplete: function() {
+                                isLiveView = false;
+                                let btn = document.getElementById('btnLiveView');
+                                if(btn) btn.style.display = 'inline-flex';
+                            }
+                        },
+                        zoom: { 
+                            wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x',
+                            onZoomComplete: function() {
+                                isLiveView = false;
+                                let btn = document.getElementById('btnLiveView');
+                                if(btn) btn.style.display = 'inline-flex';
+                            }
                         }
                     }
-                }
-            },
-            scales: { y: { min: 0, grid: { borderDash: [5, 5] } }, x: { grid: { display: false } } }
-        }
-    });
+                },
+                scales: { y: { min: 0, grid: { borderDash: [5, 5] } }, x: { grid: { display: false } } }
+            }
+        });
+    }
 
-    const ctxDt = document.getElementById('tampilanDtChart').getContext('2d');
-    tampilanDtChartInstance = new Chart(ctxDt, {
-        type: 'doughnut',
-        data: {
-            labels: ['Production', 'Maintenance', 'PPIC'],
-            datasets: [{ data: [0, 0, 0], backgroundColor: ['#3b82f6', '#ef4444', '#8b5cf6'], borderWidth: 2 }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
-    });
+    const ctxDt = document.getElementById('tampilanDtChart');
+    if(ctxDt) {
+        tampilanDtChartInstance = new Chart(ctxDt.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Production', 'Maintenance', 'PPIC'],
+                datasets: [{ data: [0, 0, 0], backgroundColor: ['#3b82f6', '#ef4444', '#8b5cf6'], borderWidth: 2 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+        });
+    }
 }
 
 function updateTampilanUI() {
     if(!document.getElementById('page-tampilan').classList.contains('active') || !currentMachine) return;
     
     let mData = machineData[currentMachine];
+    if(!mData) return;
+
     document.getElementById('tampilan-nama-mesin').innerText = mData.name;
     document.getElementById('tampilan-shift').innerText = getCurrentShiftLabel();
     
@@ -813,13 +806,11 @@ function updateTampilanUI() {
     let productToCheck = mData.currentProduct;
     let isIdle = productToCheck.includes("IDLE") || productToCheck.includes("BELUM ADA JADWAL") || productToCheck === "";
 
-    // --- PERBAIKAN MUTLAK VISUAL INSTAN ---
-    // Jangan tunggu response backend jika kecepatan asli di realtimeDB adalah 0
+    // --- VISUAL INSTANT FIX ---
     let curSpeed = 0;
     if (realtimeDBData[currentMachine] && realtimeDBData[currentMachine].speed !== undefined) {
         curSpeed = parseFloat(realtimeDBData[currentMachine].speed);
     }
-    
     let isVisuallyDown = mData.breakdown.isActive || (!isIdle && curSpeed < 20);
 
     let matchingScheds = scheduleDataList.filter(s => 
@@ -859,13 +850,10 @@ function updateTampilanUI() {
     let schedDtPpic = "-";
 
     if(activeSched) { 
-        if(typeof dataProduksi !== 'undefined') {
-            let prodDetail = dataProduksi.find(item => item["NAMA MESIN"] === currentMachine && item["NAMA PRODUK"].trim() === activeSched.produk.trim());
-            if(prodDetail) {
-                document.getElementById('tampilan-kode-mat').innerText = prodDetail["KODE MATERIAL FG NEW"] || "-";
-            } else {
-                document.getElementById('tampilan-kode-mat').innerText = "-";
-            }
+        if(typeof PRODUCTS !== 'undefined') {
+            // Kita skip auto lookup dataProduksi jika ini ditarik manual dari firebase saja.
+            let kodeMatTarget = "-";
+            document.getElementById('tampilan-kode-mat').innerText = kodeMatTarget;
         }
 
         document.getElementById('tampilan-target100').innerText = activeSched.t100 !== undefined ? activeSched.t100 : "-";
@@ -908,8 +896,11 @@ function updateTampilanUI() {
     let dp = mData.breakdown.accumulated.production / 60;
     let dm = mData.breakdown.accumulated.maintenance / 60;
     let dppic = mData.breakdown.accumulated.ppic / 60;
-    tampilanDtChartInstance.data.datasets[0].data = [dp, dm, dppic];
-    tampilanDtChartInstance.update();
+    
+    if(tampilanDtChartInstance) {
+        tampilanDtChartInstance.data.datasets[0].data = [dp, dm, dppic];
+        tampilanDtChartInstance.update();
+    }
 }
         
 function resetTampilanOrder() {
@@ -936,8 +927,9 @@ function autoCheckWO() {
     let kritisKomponen = 0;
     let pmMesin = 0;
 
-    rawMachineList.forEach(machineId => {
+    MACHINES.forEach(machineId => {
         let mData = machineData[machineId];
+        if(!mData) return;
         let runHours = mData.runningHours;
         if (runHours >= 950) { 
             pmMesin++;
@@ -946,7 +938,7 @@ function autoCheckWO() {
                 workOrders.preventive.push({
                     id: 'WO-PM-' + Math.floor(Math.random() * 9000 + 1000),
                     machine: machineId,
-                    task: `[Jadwal PM] Mesin sudah beroperasi ${runHours} Jam. Lakukan revisi total / preventive maintenance keseluruhan.`,
+                    task: `[Jadwal PM] Mesin beroperasi ${runHours} Jam. Lakukan preventive maintenance.`,
                     status: 'Menunggu Eksekusi'
                 });
             }
@@ -962,7 +954,7 @@ function autoCheckWO() {
                         id: 'WO-PD-' + Math.floor(Math.random() * 9000 + 1000),
                         machine: machineId,
                         process: proc,
-                        task: `[AI Alert] Sisa umur prediksi komponen ${proc} tinggal ${lifeHours} Jam! Berisiko breakdown, jadwalkan pergantian part.`,
+                        task: `[AI Alert] Sisa umur komponen ${proc} tinggal ${lifeHours} Jam! Jadwalkan pergantian.`,
                         status: 'Menunggu Eksekusi'
                     });
                 }
@@ -1010,17 +1002,16 @@ function setRunningProduct(index) {
     updateBreakdownUI();
 }
 
-// --- LOGIKA PERGANTIAN SHIFT MURNI UNTUK UPDATE VARIABEL UI (TANPA OVERRIDE FIREBASE OEE) ---
+// LOGIKA SHIFT MURNI UPDATE VARIABEL UI (OEE DITANGANI BACKEND PYTHON)
 setInterval(() => {
     let newShift = getCurrentShiftInfo();
     if(newShift !== currentActiveShift) {
         let currentTglIso = getFactoryDateIso();
         
-        console.log(`[SHIFT CHANGE] Transisi ke ${newShift}. Perhitungan OEE dan resolve shift dilakukan oleh Backend Python...`);
-        
+        console.log(`[SHIFT CHANGE] Transisi ke ${newShift}. Perhitungan OEE dipisah oleh Python...`);
         currentActiveShift = newShift;
         
-        rawMachineList.forEach(id => {
+        MACHINES.forEach(id => {
             if (machineData[id]) {
                 machineData[id].activeSecondsThisShift = 0;
                 machineData[id].kwhShift = 0;
@@ -1046,8 +1037,9 @@ setInterval(() => {
     }
 
     let currentTglIso = getFactoryDateIso();
-    rawMachineList.forEach(id => {
+    MACHINES.forEach(id => {
         let mData = machineData[id];
+        if(!mData) return;
         let isRunning = !mData.currentProduct.includes("IDLE") && !mData.currentProduct.includes("BELUM ADA JADWAL") && !mData.breakdown.isActive;
         let activeSched = scheduleDataList.find(s => s.mesin === id && s.tglFull === currentTglIso && s.shift === currentActiveShift && s.produk.trim() === mData.currentProduct.trim());
         if(isRunning && activeSched) {
@@ -1064,6 +1056,7 @@ setInterval(() => {
             if (d.tglFull === currentTglIso && d.shift === currentActiveShift) {
                 let mac = d.mesin;
                 let mData = machineData[mac];
+                if(!mData) return;
                 let isProductRunning = (mData.currentProduct.trim() === d.produk.trim());
 
                 if (isQualityPageActive && isProductRunning) {
@@ -1119,6 +1112,10 @@ setInterval(() => {
         renderElectricityTable();
     }
 
+    if(isTampilanActive) {
+        updateTampilanUI();
+    }
+
 }, 1000);
 
 function formatTime(totalSeconds) {
@@ -1143,24 +1140,23 @@ function exportAndClearSchedule() {
     let activeSchedules = scheduleDataList.filter(s => s.tglFull >= todayIso);
 
     if (pastSchedules.length === 0) {
-        alert("Tidak ada data jadwal dari hari sebelumnya yang bisa diunduh/di-reset.\n\nJadwal hari ini (dan masa depan) tidak akan diunduh/direset hingga berganti hari.");
+        alert("Tidak ada jadwal kemarin yang bisa di-reset. Jadwal hari ini aman.");
         return;
     }
 
-    if (!confirm(`Ditemukan ${pastSchedules.length} jadwal dari hari sebelumnya.\n\nApakah Anda yakin ingin mengunduh dan mereset (backup ke InfluxDB) data OEE tersebut? \n(Jadwal hari ini tidak akan terhapus)`)) {
+    if (!confirm(`Ditemukan ${pastSchedules.length} jadwal kemarin.\nYakin backup ke InfluxDB dan reset?`)) {
         return;
     }
 
     isResettingSchedule = true; 
 
-    console.log("Sedang mengirim backup data Schedule masa lalu ke InfluxDB...");
     fetch('https://marvelous-undamaged-flagship.ngrok-free.dev/api/write-schedule', { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(pastSchedules)
     })
     .then(res => {
-        if(!res.ok) throw new Error("Gagal backup ke Server.");
+        if(!res.ok) throw new Error("Gagal backup.");
         return res.text();
     })
     .then(msg => {
@@ -1169,14 +1165,13 @@ function exportAndClearSchedule() {
     })
     .catch(err => {
         console.error(err);
-        alert("Gagal mem-backup data ke InfluxDB! Proses hapus dibatalkan demi keamanan histori Anda.");
+        alert("Gagal backup! Reset dibatalkan.");
         isResettingSchedule = false; 
     });
 }
 
 function lanjutkanExportDanClear(pastSchedules, activeSchedules) {
     let csvContent = "data:text/csv;charset=utf-8,";
-    
     let headers = [
         "Bulan", "Tanggal", "Shift", "Working Time (Menit)", "Nama Mesin", 
         "Nama Produk", "Lebar Jumbo", "Target 100% (CRT)", "Target 70% (CRT)", 
@@ -1202,11 +1197,8 @@ function lanjutkanExportDanClear(pastSchedules, activeSchedules) {
     let encodedUri = encodeURI(csvContent);
     let link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    
     let today = new Date();
-    let fileName = `Laporan_OEE_Schedule_${today.toISOString().slice(0, 10)}.csv`;
-    link.setAttribute("download", fileName);
-    
+    link.setAttribute("download", `Laporan_OEE_Schedule_${today.toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link); 
     link.click();
     document.body.removeChild(link);
@@ -1215,23 +1207,19 @@ function lanjutkanExportDanClear(pastSchedules, activeSchedules) {
 
     let deletePromises = pastSchedules.map(s => {
         if (s.firebaseKey) {
-            return fetch(`https://cmms-2c23c-default-rtdb.asia-southeast1.firebasedatabase.app//schedules/${s.firebaseKey}.json`, {
-                method: 'DELETE'
-            });
+            return fetch(`https://cmms-2c23c-default-rtdb.asia-southeast1.firebasedatabase.app//schedules/${s.firebaseKey}.json`, { method: 'DELETE' });
         }
         return Promise.resolve();
     });
 
     Promise.all(deletePromises)
     .then(() => {
-        alert("Data hari sebelumnya berhasil diunduh, di-backup ke InfluxDB, dan di-reset dari sistem.\n\nJadwal hari ini tetap berjalan normal.");
+        alert("Reset jadwal kemarin sukses.");
         renderScheduleTable();
         updateScheduleMaintenanceStats();
         if(document.getElementById('page-schedule-maintenance').classList.contains('active')) renderQualityTable();
-        
         setTimeout(() => { isResettingSchedule = false; }, 3000);
     }).catch(e => {
-        console.error("Error menghapus jadwal lama:", e);
         isResettingSchedule = false;
     });
 }
@@ -1242,8 +1230,9 @@ function renderProductionTable() {
     tbodyProd.innerHTML = '';
     document.getElementById('production-shift-display').innerText = getCurrentShiftLabel();
 
-    rawMachineList.forEach(id => {
+    MACHINES.forEach(id => {
         let mData = machineData[id];
+        if(!mData) return;
         let isIdleOrBd = mData.currentProduct.includes("IDLE") || mData.breakdown.isActive;
         let badgeStyle = isIdleOrBd ? 'background-color: var(--danger); color: white;' : '';
         let displayedProduct = mData.currentProduct;
@@ -1266,11 +1255,11 @@ function renderElectricityTable() {
     
     let totalFactoryKwh = 0;
     let totalFactoryCost = 0;
-
     let todayIso = getFactoryDateIso();
 
-    rawMachineList.forEach(id => {
+    MACHINES.forEach(id => {
         let mData = machineData[id];
+        if(!mData) return;
         
         let activeScheds = scheduleDataList.filter(s => s.mesin === id && s.tglFull === todayIso && s.shift === currentActiveShift);
         let hasSchedule = activeScheds.length > 0;
@@ -1315,7 +1304,7 @@ function openProductionModal(machineId) {
     document.getElementById('inputProdMachineId').value = machineId;
     let sel = document.getElementById('inputProdSelect');
     sel.innerHTML = '';
-    productList.forEach(prod => {
+    PRODUCTS.forEach(prod => {
         let isSelected = (machineData[machineId].currentProduct === prod) ? 'selected' : '';
         sel.innerHTML += `<option value="${prod}" ${isSelected}>${prod}</option>`;
     });
@@ -1336,11 +1325,7 @@ function saveProductionUpdate() {
     fetch(`https://cmms-2c23c-default-rtdb.asia-southeast1.firebasedatabase.app//active_runs/${machineId}.json`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            machine: machineId,
-            product: selectedProduct,
-            timestamp: Date.now()
-        })
+        body: JSON.stringify({ machine: machineId, product: selectedProduct, timestamp: Date.now() })
     }).catch(e => console.error(e));
 
     closeModal('updateProductionModal');
@@ -1349,7 +1334,7 @@ function saveProductionUpdate() {
     updateTampilanUI();
     updateBreakdownUI();
 
-    alert(`Produksi Line ${machineId} berhasil diupdate menjadi: ${selectedProduct}`);
+    alert(`Produksi Line ${machineId} diupdate menjadi: ${selectedProduct}`);
 }
 
 function switchWoTab(tab) {
@@ -1385,7 +1370,7 @@ function renderWoUI() {
         let list = workOrders[currentWoTab];
 
         if(list.length === 0) {
-            container.innerHTML = `<p style="color:#94a3b8; font-style:italic; padding: 20px;">Tidak ada Work Order ${currentWoTab} saat ini.</p>`;
+            container.innerHTML = `<p style="color:#94a3b8; font-style:italic; padding: 20px;">Tidak ada Work Order saat ini.</p>`;
             return;
         }
 
@@ -1410,7 +1395,7 @@ function renderWoUI() {
                 </div>
                 <div class="wo-card-footer">
                     <button class="btn btn-success" onclick="selesaikanWO('${currentWoTab}', ${index})">
-                        <i class="fa-solid fa-check"></i> Eksekusi Selesai
+                        <i class="fa-solid fa-check"></i> Selesai
                     </button>
                 </div>
             </div>`;
@@ -1420,7 +1405,7 @@ function renderWoUI() {
 }
 
 function selesaikanWO(type, index) {
-    if(confirm("Tandai Work Order ini telah selesai dieksekusi oleh teknisi?")) {
+    if(confirm("Tandai Work Order ini telah selesai?")) {
         let completedWo = workOrders[type][index];
         if (type === 'preventive') {
             machineData[completedWo.machine].runningHours = 0; 
@@ -1434,11 +1419,8 @@ function selesaikanWO(type, index) {
 
 function toggleWoMachineManual() {
     let val = document.getElementById('inputWoMachine').value;
-    if(val === 'Lainnya') {
-        document.getElementById('inputWoMachineManual').style.display = 'block';
-    } else {
-        document.getElementById('inputWoMachineManual').style.display = 'none';
-    }
+    if(val === 'Lainnya') document.getElementById('inputWoMachineManual').style.display = 'block';
+    else document.getElementById('inputWoMachineManual').style.display = 'none';
 }
 
 function saveManualWo() {
@@ -1450,25 +1432,20 @@ function saveManualWo() {
     let desc = document.getElementById('inputWoDesc').value.trim();
     
     if(!mac || !dept || !deadline || !desc) {
-        return alert("Pilih mesin, departemen requestor, deadline, dan isi deskripsi keluhan terlebih dahulu!");
+        return alert("Lengkapi data keluhan WO!");
     }
 
     let woEntry = {
         id: 'WO-M-' + Math.floor(Math.random() * 9000 + 1000),
-        machine: mac,
-        task: `[Req: ${dept}] | Deadline: ${deadline}\nKeluhan: ${desc}`,
-        status: 'Menunggu Eksekusi',
-        dept: dept,          
-        deadline: deadline, 
-        desc: desc          
+        machine: mac, task: `[Req: ${dept}] | Deadline: ${deadline}\nKeluhan: ${desc}`,
+        status: 'Menunggu Eksekusi', dept: dept, deadline: deadline, desc: desc          
     };
 
     workOrders.manual.push(woEntry);
     syncToGoogleSheets("addWo", woEntry);
-
     closeModal('addWoModal');
     renderWoUI();
-    alert("Work Order Manual berhasil dibuat dan data siap dikirim!");
+    alert("WO berhasil dibuat!");
 }
 
 function toggleUnitManual() {
@@ -1507,7 +1484,7 @@ function saveLogbook() {
     let totalWaktu = document.getElementById('logTotalWaktu').value;
     
     if(!tgl || !mesin || !unit || !masalah || !kategori || !mulai || !selesai) {
-        return alert("Mohon lengkapi data Tanggal, Mesin, Unit, Kategori, Masalah, dan Waktu Pengerjaan!");
+        return alert("Mohon lengkapi data!");
     }
 
     let logEntry = {
@@ -1524,7 +1501,7 @@ function saveLogbook() {
     syncToGoogleSheets("addLogbook", logEntry); 
     closeModal('addLogbookModal');
     renderLogbookTable();
-    alert("Laporan Logbook berhasil disimpan dan dikirim!");
+    alert("Logbook disimpan!");
 }
 
 function renderLogbookTable() {
@@ -1576,7 +1553,7 @@ function saveSho() {
     let tekAwal = document.getElementById('shoTeknisi').value.trim();
     let tekLanjut = document.getElementById('shoTeknisiNext').value.trim();
 
-    if(!tgl || !tekAwal || !tekLanjut) return alert("Tanggal dan Nama Teknisi (Shift Selesai & Penerima) wajib diisi!");
+    if(!tgl || !tekAwal || !tekLanjut) return alert("Lengkapi form SHO!");
 
     let shoEntry = {
         tanggal: tgl, shift: document.getElementById('shoShift').value,
@@ -1592,8 +1569,7 @@ function saveSho() {
     closeModal('addShoModal');
     renderShoTable();
     renderLogbookTable(); 
-    
-    alert("Laporan Shift Handover (SHO) Berhasil Disimpan! Layar Logbook telah bersihkan untuk shift berikutnya.");
+    alert("SHO Disimpan! Logbook direset untuk shift berikutnya.");
 }
 
 function renderShoTable() {
@@ -1622,7 +1598,7 @@ function initBreakdownFreq() {
     let container = document.getElementById('breakdown-freq-container');
     if (!container) return;
     container.innerHTML = '';
-    rawMachineList.forEach(mac => {
+    MACHINES.forEach(mac => {
         if(breakdownFreq[mac] === undefined) breakdownFreq[mac] = 0;
         container.innerHTML += `
             <div style="display:flex; flex-direction:column; align-items:center; padding: 15px; border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 8px; cursor: default;">
@@ -1638,7 +1614,7 @@ function renderQualityTable() {
     tbody.innerHTML = '';
 
     if (scheduleDataList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #94a3b8; font-style: italic; padding: 20px;">Belum ada data dari Schedule Produksi. Silakan isi data di menu Schedule Produksi terlebih dahulu!</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #94a3b8; font-style: italic; padding: 20px;">Belum ada data dari Schedule Produksi.</td></tr>`;
         return;
     }
 
@@ -1669,7 +1645,7 @@ function calculateQualityPercent(index, value) {
     let acc = parseFloat(value) || 0;
     
     if (acc > entry.actual) {
-        alert("Jumlah ACC Produk tidak boleh melebihi hasil Actual Output!");
+        alert("Jumlah ACC Produk tidak boleh melebihi Actual Output!");
         acc = entry.actual;
         document.getElementById(`qual-input-${index}`).value = acc;
     }
@@ -1742,7 +1718,7 @@ function switchPage(pageId) {
         document.getElementById('topbar-title').innerText = "Input & Analisa Downtime";
         let sel = document.getElementById('bd-machine-select');
         sel.innerHTML = '';
-        rawMachineList.forEach(id => {
+        MACHINES.forEach(id => {
             sel.innerHTML += `<option value="${id}">${machineData[id].name}</option>`;
         });
         sel.value = currentMachine;
@@ -1762,7 +1738,7 @@ function switchPage(pageId) {
         document.getElementById('topbar-title').innerText = "Tampilan Mesin Terintegrasi";
         let sel = document.getElementById('tampilan-machine-select');
         sel.innerHTML = '';
-        rawMachineList.forEach(id => {
+        MACHINES.forEach(id => {
             sel.innerHTML += `<option value="${id}">${machineData[id].name}</option>`;
         });
         sel.value = currentMachine;
@@ -1775,9 +1751,6 @@ function switchPage(pageId) {
     }
 }
 
-// ==========================================
-// FITUR ANALISA HISTORIS & REPORTING
-// ==========================================
 let analisaSpeedChartInstance = null;
 let analisaCostChartInstance = null;
 let analisaKwChartInstance = null;
@@ -1789,7 +1762,7 @@ function initAnalisaPage() {
     let sel = document.getElementById('analisaMachineSelect');
     if(sel.options.length === 0) {
         sel.innerHTML = `<option value="ALL">Semua Mesin</option>`;
-        rawMachineList.forEach(id => {
+        MACHINES.forEach(id => {
             sel.innerHTML += `<option value="${id}">${machineData[id].name}</option>`;
         });
     }
@@ -1908,19 +1881,14 @@ function generateAnalisaReport() {
             console.warn("Tidak ada histori sensor pada rentang waktu ini.");
         } else {
             analisaReportData = data;
-            let labels = [];
-            let speedArr = [];
-            let costArr = [];
-            let kwArr = [];
+            let labels = []; let speedArr = []; let costArr = []; let kwArr = [];
 
             data.forEach(row => {
                 let dt = new Date(row.time);
                 let label = "";
-                if (interval === '1h') {
-                    label = `${dt.getDate()}/${dt.getMonth()+1} ${dt.getHours()}:00`;
-                } else if (interval === '1d') {
-                    label = `${dt.getDate()}/${dt.getMonth()+1}/${dt.getFullYear()}`;
-                } else {
+                if (interval === '1h') label = `${dt.getDate()}/${dt.getMonth()+1} ${dt.getHours()}:00`;
+                else if (interval === '1d') label = `${dt.getDate()}/${dt.getMonth()+1}/${dt.getFullYear()}`;
+                else {
                     let monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
                     label = `${monthNames[dt.getMonth()]} ${dt.getFullYear()}`;
                 }
@@ -1934,7 +1902,6 @@ function generateAnalisaReport() {
                 let calcCost = Math.round(energyKwh * tarifKwh);
                 
                 costArr.push(calcCost);
-                
                 row.calculatedCost = calcCost;
                 row.label = label;
             });
@@ -1952,9 +1919,7 @@ function generateAnalisaReport() {
             analisaCostChartInstance.update();
         }
     })
-    .catch(err => {
-        console.error("Gagal menarik data report sensor:", err);
-    });
+    .catch(err => console.error("Gagal menarik data report sensor:", err));
 
     fetch(`https://marvelous-undamaged-flagship.ngrok-free.dev/api/report-schedule/${machineId}`, {
         method: 'POST',
@@ -1964,7 +1929,7 @@ function generateAnalisaReport() {
     .then(res => res.json())
     .then(data => {
         if(!data || data.length === 0) {
-            console.warn("Tidak ada histori schedule OEE pada rentang waktu ini.");
+            console.warn("Tidak ada histori schedule OEE.");
             let tbody = document.getElementById('db-analisa-schedule-body');
             if(tbody) tbody.innerHTML = '<tr><td colspan="25" style="text-align: center; color: #94a3b8; font-style: italic; padding: 20px;">Tidak ada histori schedule / OEE pada rentang tanggal ini.</td></tr>';
         } else {
@@ -1973,9 +1938,7 @@ function generateAnalisaReport() {
             updateAnalisaOeeChart(data);
         }
     })
-    .catch(err => {
-        console.error("Gagal menarik data histori schedule:", err);
-    });
+    .catch(err => console.error("Gagal menarik data histori schedule:", err));
 }
 
 function renderAnalisaScheduleTable(data) {
@@ -2033,19 +1996,13 @@ function renderAnalisaScheduleTable(data) {
 function updateAnalisaOeeChart(data) {
     if(!analisaOeeChartInstance) return;
     
-    let labels = [];
-    let availData = [];
-    let perfData = [];
-    let oeeData = [];
-
+    let labels = []; let availData = []; let perfData = []; let oeeData = [];
     let machineId = document.getElementById('analisaMachineSelect').value;
     
     if (machineId === "ALL") {
         let grouped = {};
         data.forEach(d => {
-            if(!grouped[d.mesin]) {
-                grouped[d.mesin] = { availSum: 0, perfSum: 0, oeeSum: 0, count: 0 };
-            }
+            if(!grouped[d.mesin]) grouped[d.mesin] = { availSum: 0, perfSum: 0, oeeSum: 0, count: 0 };
             grouped[d.mesin].availSum += parseFloat(d.availMachine) || 0;
             grouped[d.mesin].perfSum += parseFloat(d.perf) || 0;
             grouped[d.mesin].oeeSum += parseFloat(d.oee) || 0;
@@ -2081,8 +2038,8 @@ function downloadAnalisaChart(chartId, title) {
     let canvas = document.getElementById(chartId);
     if(!canvas) return;
     let link = document.createElement('a');
-    
     let ctx = canvas.getContext('2d');
+    
     ctx.globalCompositeOperation = 'destination-over';
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -2103,13 +2060,11 @@ function downloadAnalisaCSV(type) {
     else headerText = 'Konsumsi Daya (kW)';
 
     let csv = `Waktu,${headerText}\n`;
-    
     analisaReportData.forEach(row => {
         let val = 0;
         if (type === 'Speed') val = row.speed;
         else if (type === 'Cost') val = row.calculatedCost;
         else val = row.powerKw;
-        
         csv += `"${row.label}","${val}"\n`;
     });
 
@@ -2123,13 +2078,9 @@ function downloadAnalisaCSV(type) {
 }
 
 function downloadAnalisaScheduleCSV() {
-    if (analisaScheduleHistoryData.length === 0) {
-        alert("Tidak ada data histori jadwal untuk diunduh. Silakan generate laporan terlebih dahulu!");
-        return;
-    }
+    if (analisaScheduleHistoryData.length === 0) return alert("Tidak ada data histori jadwal untuk diunduh.");
 
     let csvContent = "data:text/csv;charset=utf-8,";
-    
     let headers = [
         "Bulan", "Tanggal", "Shift", "Working Time (Menit)", "Nama Mesin", 
         "Nama Produk", "Lebar Jumbo", "Target 100% (CRT)", "Target 70% (CRT)", 
@@ -2155,45 +2106,35 @@ function downloadAnalisaScheduleCSV() {
     let encodedUri = encodeURI(csvContent);
     let link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    
     let today = new Date();
     let mac = document.getElementById('analisaMachineSelect').value;
-    let fileName = `Histori_OEE_${mac}_${today.toISOString().slice(0, 10)}.csv`;
-    link.setAttribute("download", fileName);
-    
+    link.setAttribute("download", `Histori_OEE_${mac}_${today.toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link); 
     link.click();
     document.body.removeChild(link);
 }
 
+// BUNGKUS DENGAN TRY-CATCH AGAR ERROR LIBRARY TIDAK MEMATIKAN APLIKASI
 window.onload = () => {
     currentActiveShift = getCurrentShiftInfo(); 
 
     buildInitialMachineData();
     refreshDashboardUI();
-    initChart();
-    initTampilanCharts(); 
-    initAnalisaCharts(); 
+    
+    try { initChart(); } catch(e){}
+    try { initTampilanCharts(); } catch(e){}
+    try { initAnalisaCharts(); } catch(e){}
+    
     autoCheckWO(); 
     renderLogbookTable(); 
     renderShoTable();
 
-    // Inisialisasi awal tarik data dari Firebase 
     fetchSchedulesFromFirebase();
     fetchActiveRunsFromFirebase();
-    
-    // Diisi di callback akhirnya fetchSchedulesFromFirebase
-    // fetchBreakdownStatesFromFirebase();
 
     setInterval(updateRealtimeClock, 1000);
     setInterval(liveUpdateDashboard, 2000); 
-    
-    // --- UBAHAN MUTLAK: POLLING PENGGANTI SET_INTERVAL OEE ---
-    // Meminta update UI dan Polling Sensor Speed hanya 1 detik sekali (Downtime/OEE dihitung di backend)
     setInterval(pollRealtimeData, 1000); 
-
-    // Polling Firebase setiap 3 detik untuk menarik data Jadwal yang telah dikalkulasi OEE nya oleh Python
     setInterval(fetchSchedulesFromFirebase, 3000);
-    // Polling setiap 3 detik untuk menarik Akumulasi Daya yang dikerjakan oleh Python
     setInterval(fetchAccumulatedPowerFromFirebase, 3000);
 };
