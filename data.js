@@ -2,6 +2,7 @@
 let currentActiveShift = "";
 let isResettingSchedule = false; // FLAG PENGUNCI AGAR TIDAK BENTROK SAAT RESET
 let lastPollTime = Date.now(); // KUNCI ANTI-GHOST UNTUK TAB TERTIDUR
+let isShiftTransition = false; // MENCEGAH ACTUAL OUTPUT TERTABRAK SAAT GANTI SHIFT
 
 // --- UBAHAN: TARIF KWH MENJADI AKTUAL RP 1500 ---
 const tarifKwh = 1500; 
@@ -91,12 +92,6 @@ let isLiveView = true;
 let currentHourLabel = "";
 let currentHourSpeedSum = 0;
 let currentHourSpeedCount = 0;
-// --------------------------------------------------------
-
-// --- VARIABEL GLOBAL UNTUK SINKRONISASI AKTUAL OUTPUT ---
-let lastTimbanganCount = {};
-let isFirstTimbanganFetch = {};
-let currentTimbanganCounts = {}; 
 // --------------------------------------------------------
 
 // Array Global Untuk Menampung Semua Riwayat Breakdown
@@ -218,8 +213,6 @@ function resetLiveView() {
 // -----------------------------------------------------------
 
 // --- FIREBASE RTDB AUTO BREAKDOWN ---
-const firebaseUrlRT = 'https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/speed_mesin.json';        
-        
 let realtimeDBData = {};
 let autoBreakdownState = {};
 let pendingAutoBd = { machineId: null, elapsedSec: 0 }; 
@@ -482,7 +475,7 @@ function applySilentBreakdownResolution(macId, finalCategory) {
     let mData = machineData[macId];
     if (!mData || !mData.breakdown.isActive) return;
 
-    let elapsedSec = mData.breakdown.lockedElapsedSec !== null ? mData.breakdown.lockedElapsedSec : Math.floor((new Date() - mData.breakdown.startTime) / 1000);
+    let elapsedSec = mData.breakdown.lockedElapsedSec !== null ? mData.breakdown.lockedElapsedSec : Math.floor((Date.now() - mData.breakdown.startTime.getTime()) / 1000);
 
     mData.breakdown.category = finalCategory;
     
@@ -621,149 +614,14 @@ function liveUpdateDashboard() {
     }
 }
 
-// =========================================================================
-// PIPELINE ONVALUE REST API MURNI (Server-Sent Events) - PENGGANTI POLLING
-// =========================================================================
-window.streamedSpeedData = {};
-window.streamedDayaData = {};
 
-function onValueREST(path, callback) {
-    const source = new EventSource(`https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/${path}.json`);
-    let localData = null;
-
-    source.addEventListener('put', (e) => {
-        if (isResettingSchedule) return; // Mencegah bentrok
-        const payload = JSON.parse(e.data);
-        if (payload.path === "/") {
-            localData = payload.data;
-        } else {
-            if (localData === null || typeof localData !== 'object') localData = {};
-            let parts = payload.path.split('/').filter(Boolean);
-            let current = localData;
-            for (let i = 0; i < parts.length - 1; i++) {
-                if (!current[parts[i]]) current[parts[i]] = {};
-                current = current[parts[i]];
-            }
-            if (payload.data === null) delete current[parts[parts.length - 1]];
-            else current[parts[parts.length - 1]] = payload.data;
-        }
-        callback(localData);
-    });
-
-    source.addEventListener('patch', (e) => {
-        if (isResettingSchedule) return;
-        const payload = JSON.parse(e.data);
-        if (localData === null || typeof localData !== 'object') localData = {};
-        
-        let basePathParts = payload.path.split('/').filter(Boolean);
-        for (let key in payload.data) {
-            let fullPathParts = [...basePathParts, ...key.split('/').filter(Boolean)];
-            let current = localData;
-            for (let i = 0; i < fullPathParts.length - 1; i++) {
-                if (!current[fullPathParts[i]]) current[fullPathParts[i]] = {};
-                current = current[fullPathParts[i]];
-            }
-            let lastKey = fullPathParts[fullPathParts.length - 1];
-            if (payload.data[key] === null) delete current[lastKey];
-            else current[lastKey] = payload.data[key];
-        }
-        callback(localData);
-    });
-
-    source.onerror = () => {
-        console.warn(`[REALTIME PIPA] Terputus dari ${path}. Browser akan menyambung ulang otomatis...`);
-    };
-}
-
-// -------------------------------------------------------------
-// PERBAIKAN BOTTLENECK BROWSER (MENGGABUNGKAN 6 KONEKSI JADI 1)
-// -------------------------------------------------------------
-function setupRealtimeListeners() {
-    // 1. Pipa Stream Speed Mesin (1 Koneksi)
-    onValueREST("speed_mesin", (data) => {
-        if (data) window.streamedSpeedData = data;
-    });
-
-    // 2. Pipa Stream Daya Listrik (1 Koneksi)
-    onValueREST("DAYA", (data) => {
-        if (data) window.streamedDayaData = data;
-    });
-
-    // 3. Pipa Stream Sinkronisasi Modal Antar HP (1 Koneksi)
-    onValueREST("bd_resolved_flag", (flags) => {
-        if(!flags) return;
-        for(let mac in flags) {
-            let mData = machineData[mac];
-            let flag = flags[mac];
-            if (mData && mData.breakdown.isActive && mData.breakdown.category === "AUTO-PENDING") {
-                if (flag.timestamp > mData.breakdown.startTime.getTime()) {
-                    console.log(`[SYNC] Mesin ${mac} telah dikategorikan sebagai '${flag.category}' oleh perangkat lain. Menutup modal...`);
-                    applySilentBreakdownResolution(mac, flag.category);
-                }
-            }
-        }
-    });
-
-    // 4. Pipa Stream Timbangan MURNI ABSOLUT SYNC (CUMA 1 KONEKSI UNTUK SEMUA MESIN)
-    onValueREST("timbangan", (data) => {
-        if (isResettingSchedule) return;
-
-        let timbanganData = data || {};
-        
-        rawMachineList.forEach(mac => {
-            let macData = timbanganData[mac.toUpperCase()];
-            let totalDataFirebase = macData ? Object.keys(macData).length : 0;
-            
-            let exactTglIso = getFactoryDateIso();
-            let exactShift = getCurrentShiftInfo();
-            
-            let validSchedules = scheduleDataList.filter(s => {
-                return s.mesin === mac && s.shift === exactShift && s.tglFull === exactTglIso;
-            });
-            
-            if (validSchedules.length > 0) {
-                let mData = machineData[mac];
-                let runningProduct = mData ? mData.currentProduct.trim() : "";
-                
-                let targetSched = validSchedules.find(s => s.produk.trim() === runningProduct);
-                if (!targetSched) {
-                    targetSched = validSchedules[validSchedules.length - 1]; 
-                }
-
-                // KUNCI PERBAIKAN: TINGGAL NYAMAIN DATA DARI FIREBASE SECARA MUTLAK
-                // Tidak lagi pakai logika math penambahan.
-                if (targetSched.actual !== totalDataFirebase) {
-                    targetSched.actual = totalDataFirebase;
-                    
-                    if (targetSched.firebaseKey) {
-                        fetch(`https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/schedules/${targetSched.firebaseKey}.json`, {
-                            method: 'PATCH',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ actual: targetSched.actual })
-                        }).catch(e => console.error(e));
-                    }
-                    
-                    // Segarkan tampilan secara instan jika ada update
-                    if(document.getElementById('page-schedule-maintenance').classList.contains('active')) {
-                        renderQualityTable();
-                    }
-                    if(document.getElementById('page-tampilan').classList.contains('active')) {
-                        updateTampilanUI();
-                    }
-                }
-            }
-        });
-    });
-}
-// =========================================================================
-
-// FUNGSI INI KINI HANYA MENJADI MESIN HITUNG MATEMATIKA LOKAL (Tanpa Download Firebase lagi!)
+// --- FUNGSI MURNI POLLING FETCH - PENGGANTI SSE YANG BERMASALAH ---
 function pollRealtimeData() {
-    if (isResettingSchedule) return;
+    // PROTEKSI BENTROK SAAT GANTI SHIFT ATAU RESET
+    if (isResettingSchedule || isShiftTransition) return;
 
-    // --- KUNCI ANTI-GHOST TAB TIDUR ---
     let nowTime = Date.now();
-    let isAsleep = (nowTime - lastPollTime > 10000); // Jika tab tidak merespon lebih dari 10 detik
+    let isAsleep = (nowTime - lastPollTime > 10000); 
     lastPollTime = nowTime;
 
     if (isAsleep) {
@@ -772,56 +630,111 @@ function pollRealtimeData() {
         return; 
     }
 
-    // 1. Eksekusi Speed & Breakdown (Menggunakan data dari Pipa Realtime)
-    let speedDataStream = window.streamedSpeedData;
-    if (speedDataStream) {
-        for (let macId in speedDataStream) {
-            let upperMacId = macId.toUpperCase();
-            let machineValue = speedDataStream[macId];
-            let mData = machineData[upperMacId];
-            
-            if (machineValue !== null && machineValue !== undefined && mData) {
-                let speedNum = 0;
-                if (typeof machineValue === 'object') {
-                    if (machineValue.speed !== undefined) speedNum = parseFloat(machineValue.speed);
-                    else if (machineValue.target_counter !== undefined) speedNum = parseFloat(machineValue.target_counter);
-                } else {
-                    speedNum = parseFloat(machineValue);
-                }
+    // 1. Fetch Speed untuk Auto-Breakdown & Dashboard
+    fetch('https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/speed_mesin.json')
+      .then(res => res.json())
+      .then(data => {
+          if (!data) return;
+          
+          for (let macId in data) {
+              let upperMacId = macId.toUpperCase();
+              let machineValue = data[macId];
+              let mData = machineData[upperMacId];
+              
+              if (machineValue !== null && machineValue !== undefined && mData) {
+                  let speedNum = 0;
+                  
+                  if (typeof machineValue === 'object') {
+                      if (machineValue.speed !== undefined) speedNum = parseFloat(machineValue.speed);
+                      else if (machineValue.target_counter !== undefined) speedNum = parseFloat(machineValue.target_counter);
+                  } else {
+                      speedNum = parseFloat(machineValue);
+                  }
+                  
+                  if (!isNaN(speedNum)) {
+                      realtimeDBData[upperMacId] = { speed: speedNum };
+                  }
+              }
+          }
+          processAutoBreakdown(); // Panggil di sini agar speed 0 bisa memicu downtime
+      })
+      .catch(e => console.warn("Menunggu koneksi RTDB Speed..."));
+
+    // 2. Fetch Actual Output KHUSUS TIMBANGAN (SINKRONISASI MUTLAK ABSOLUT)
+    let tglIso = getFactoryDateIso();
+    let curShift = getCurrentShiftInfo();
+
+    rawMachineList.forEach(mac => {
+        fetch(`https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/timbangan/${mac.toUpperCase()}.json`)
+        .then(res => res.json())
+        .then(data => {
+            let totalDataFirebase = data ? Object.keys(data).length : 0;
+
+            // Pastikan kita HANYA menyentuh jadwal di shift yang SEKARANG AKTIF
+            let validSchedules = scheduleDataList.filter(s => {
+                return s.mesin === mac && s.shift === curShift && s.tglFull === tglIso;
+            });
+
+            if (validSchedules.length > 0) {
+                let mData = machineData[mac];
+                let runningProduct = mData ? mData.currentProduct.trim() : "";
                 
-                if (!isNaN(speedNum)) {
-                    realtimeDBData[upperMacId] = { speed: speedNum };
+                // Cari jadwal yang cocok dengan produk yang jalan (Atau fallback ke jadwal terakhir)
+                let targetSched = validSchedules.find(s => s.produk.trim() === runningProduct);
+                if (!targetSched) {
+                    targetSched = validSchedules[validSchedules.length - 1]; 
+                }
+
+                // --- LOGIKA NYAMAIN DATA (ABSOLUT AMAN) ---
+                // Hanya perbarui jadwal JIKA angka di Firebase lebih tinggi.
+                // Jika Firebase 0 (dihapus karena ganti shift), JANGAN TIMPA angka aktual jadwal menjadi 0!
+                if (totalDataFirebase > targetSched.actual) {
+                    targetSched.actual = totalDataFirebase;
+
+                    if (targetSched.firebaseKey && !isResettingSchedule) {
+                        fetch(`https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/schedules/${targetSched.firebaseKey}.json`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ actual: targetSched.actual })
+                        }).catch(e => {});
+                    }
+                    
+                    if(document.getElementById('page-schedule-maintenance').classList.contains('active')) renderQualityTable();
+                    if(document.getElementById('page-tampilan').classList.contains('active')) updateTampilanUI();
                 }
             }
-        }
-        processAutoBreakdown(); // Tetap dipanggil tiap detik untuk update counter Breakdown
-    }
 
-    // 2. Kalkulasi Realtime COST LISTRIK Mutlak Per Mesin Per Shift (Wajib jalan tiap detik, mengambil dari Pipa Realtime Daya)
-    let dayaDataStream = window.streamedDayaData;
-    if (dayaDataStream) {
+            if (!realtimeDBData[mac]) realtimeDBData[mac] = {};
+            realtimeDBData[mac].lastUpdate = Date.now();
+        }).catch(e => {});
+    });
+
+    // 3. Fetch Realtime DAYA Listrik
+    fetch('https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/DAYA.json')
+    .then(res => res.json())
+    .then(dayaData => {
+        if(!dayaData) return;
+        
         let localTglIso = getFactoryDateIso();
         let localCurShift = getCurrentShiftInfo();
 
-        for(let key in dayaDataStream) {
+        for(let key in dayaData) {
             let macId = key.toUpperCase(); 
-            let powerKw = parseFloat(dayaDataStream[key]);
+            let powerKw = parseFloat(dayaData[key]);
             if(isNaN(powerKw)) continue;
 
             if(machineData[macId]) {
                 machineData[macId].livePowerKw = powerKw; 
                 let mData = machineData[macId];
                 
-                // Dihitung mutlak per-Mesin & per-Shift tiap detik
                 let costDetikIni = powerKw * tarifListrikPerDetik;
                 let addedKwh = powerKw / 3600;
 
                 mData.kwhShift = (mData.kwhShift || 0) + addedKwh;
                 mData.costShift = (mData.costShift || 0) + costDetikIni;
 
-                if (isResettingSchedule) return; 
+                if (isResettingSchedule || isShiftTransition) return;
 
-                // Update LOKAL saja untuk tiap jadwal
                 let schedulesThisShift = scheduleDataList.filter(s => 
                     s.mesin === macId && s.tglFull === localTglIso && s.shift === localCurShift
                 );
@@ -834,7 +747,100 @@ function pollRealtimeData() {
                 }
             }
         }
+    }).catch(e => {});
+    
+    // 4. SINKRONISASI MODAL DOWNTIME LINTAS HP
+    fetch('https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/bd_resolved_flag.json')
+    .then(res => res.json())
+    .then(flags => {
+        if(!flags) return;
+        for(let mac in flags) {
+            let mData = machineData[mac];
+            let flag = flags[mac];
+            
+            if (mData && mData.breakdown.isActive && mData.breakdown.category === "AUTO-PENDING") {
+                if (flag.timestamp > mData.breakdown.startTime.getTime()) {
+                    console.log(`[SYNC] Mesin ${mac} diselesaikan via HP lain. Menutup modal...`);
+                    applySilentBreakdownResolution(mac, flag.category);
+                }
+            }
+        }
+    }).catch(e => {});
+}
+
+// --- PERBAIKAN MUTLAK AUTO FORCE DOWNTIME DAN PENUMPUKAN DOWNTIME ---
+function processAutoBreakdown() {
+    for (let macId in realtimeDBData) {
+        if (machineData[macId]) {
+            if(realtimeDBData[macId].speed === undefined || realtimeDBData[macId].speed === null) continue;
+
+            let speedVal = parseFloat(realtimeDBData[macId].speed);
+
+            if (!autoBreakdownState[macId]) {
+                autoBreakdownState[macId] = { isAutoDown: false, startTime: null };
+            }
+            let state = autoBreakdownState[macId];
+            let mData = machineData[macId];
+
+            // CEK JIKA MESIN SEDANG IDLE ATAU BELUM ADA JADWAL (Mencegah Breakdown palsu)
+            let isIdleStatus = mData.currentProduct.includes("IDLE") || mData.currentProduct.includes("BELUM ADA JADWAL");
+
+            // JIKA MESIN JALAN (SPEED >= 20)
+            if (speedVal >= 20) {
+                if (state.isAutoDown) {
+                    state.isAutoDown = false;
+                    // Hanya kunci waktu untuk memunculkan modal (Tunggu pilihan dari user)
+                    if (mData.breakdown.isActive && mData.breakdown.category === "AUTO-PENDING") {
+                        mData.breakdown.lockedElapsedSec = Math.floor((Date.now() - mData.breakdown.startTime.getTime()) / 1000);
+                    }
+                }
+            } 
+            // JIKA MESIN MATI / DOWNTIME (SPEED < 20)
+            else if (speedVal < 20 && !isIdleStatus) {
+                if (!state.isAutoDown) {
+                    // Cek jika mesin mati LAGI sebelum downtime sebelumnya sempat dikategorikan dari Popup
+                    if (mData.breakdown.isActive && mData.breakdown.category === "AUTO-PENDING") {
+                        let forcedSec = mData.breakdown.lockedElapsedSec !== null 
+                            ? mData.breakdown.lockedElapsedSec 
+                            : Math.floor((Date.now() - mData.breakdown.startTime.getTime()) / 1000);
+                            
+                        console.log(`[AUTO-FORCE] Mesin ${macId} mati beruntun sebelum dikategorikan. Paksa simpan dt sebelumnya ke 'production'.`);
+                        // Auto-pilih ke 'production' sesuai instruksi jika lupa milih/mati beruntun
+                        saveAutoBreakdown('production', macId, forcedSec);
+                    }
+
+                    // Buat dan jalankan Timer Downtime BARU
+                    mData.breakdown.isActive = true;
+                    mData.breakdown.category = "AUTO-PENDING";
+                    mData.breakdown.startTime = new Date(); // Mulai dari 0 detik
+                    mData.breakdown.lockedElapsedSec = null; 
+                    
+                    state.isAutoDown = true;
+                    state.startTime = mData.breakdown.startTime;
+
+                    // [POST EVENT] Start Breakdown agar tercatat ke Firebase
+                    fetch('https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/breakdown_events.json', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            machine: macId,
+                            type: 'START',
+                            startTime: mData.breakdown.startTime.getTime(),
+                            timestamp: Date.now()
+                        })
+                    }).catch(e => console.error("Error post bd start:", e));
+
+                    updateBreakdownUI();
+                    refreshDashboardUI();
+                    updateTampilanUI();
+                }
+            }
+        }
     }
+    
+    // Eksekusi Pengecekan Monitor setelah semua proses deteksi mesin selesai
+    checkPendingModal();
+    updateDowntimeBadge(); // Panggil update badge
 }
 
 // PERBAIKAN MUTLAK PENYIMPANAN SHIFT LAMA: Memastikan event masuk ke tanggal dan shift yang akurat
@@ -970,10 +976,6 @@ function buildInitialMachineData() {
         let fullName = "Line " + id;
         
         breakdownFreq[id] = 0; 
-        
-        // Setup initial global tracking for timbangan agar tidak crash
-        lastTimbanganCount[id] = 0;
-        isFirstTimbanganFetch[id] = true;
 
         if (id.startsWith("NP") || id.startsWith("FC") || id.startsWith("TW")) {
             proc = ['Unwinder', 'Emboss', 'Folding', 'Bandsaw'];
@@ -1031,7 +1033,6 @@ function syncBreakdownMachine() {
     updateBreakdownUI();
     updateTampilanUI();
     
-    // TAMBAHAN: Panggil pengecekan modal DT langsung
     checkPendingModal();
 }
         
@@ -1043,33 +1044,24 @@ function syncTampilanMachine() {
     updateBreakdownUI();
     updateTampilanUI();
     
-    // UBAHAN INTEGRASI INFLUX: Tarik histori lagi saat mesin diganti manual di dropdown Tampilan
     fetchHistoryFromLocal(currentMachine);
-
-    // TAMBAHAN: Panggil pengecekan modal DT langsung
     checkPendingModal();
 }
 
-// --- FUNGSI BARU: Hitung Akumulasi Downtime Berdasarkan Event yang tersimpan di memori/Firebase ---
 function recalcDowntimeAccumulation() {
     let currentTglIso = getFactoryDateIso();
-
     let totalPabrik = { production: 0, maintenance: 0, ppic: 0 };
     
-    // Reset Data Spesifik Mesin
     for(let mac in machineData) {
         machineData[mac].breakdown.accumulated = { production: 0, maintenance: 0, ppic: 0 };
     }
 
     allBreakdownEvents.forEach(ev => {
-        // Ambil downtime hanya untuk Shift Berjalan Hari Ini!
         if (ev.type === 'END' && ev.date === currentTglIso && ev.shift === currentActiveShift) {
             let cat = ev.category;
             if(cat) {
-                // 1. Akumulasi Global / Total Pabrik Shift Ini (Berdasarkan semua produk & mesin)
                 totalPabrik[cat] += ev.elapsedSec;
                 
-                // 2. Akumulasi Spesifik Mesin (HANYA BERDASARKAN MESIN & SHIFT INI, MENGABAIKAN NAMA PRODUK AGAR TIDAK HILANG SAAT DIEDIT)
                 let mData = machineData[ev.machine];
                 if(mData) {
                     mData.breakdown.accumulated[cat] += ev.elapsedSec;
@@ -1081,10 +1073,7 @@ function recalcDowntimeAccumulation() {
     return totalPabrik;
 }
 
-// --- FUNGSI UBAHAN ---
-// Memperbaiki persentase kalkulasi menjadi merujuk ke Running / Working Time jadwal, bukan perbandingan antar downtime
 function updateBreakdownUI() {
-    // Jalankan kalkulasi yang akan mereset spesifik mesin jika ganti produk
     let totalPabrik = recalcDowntimeAccumulation();
 
     if(!document.getElementById('page-kpi-oee').classList.contains('active')) return;
@@ -1107,18 +1096,13 @@ function updateBreakdownUI() {
         document.getElementById('bd-timer').innerText = "00:00:00";
     }
 
-    // --- MENGAMBIL WORKING TIME (WT) DARI SCHEDULE SEBAGAI PEMBAGI ---
     let currentTglIso = getFactoryDateIso();
-
-    let spesifikWt = 480; // Default working time spesifik mesin
-    let totalWtPabrik = 0; // UBAHAN BARU: Dynamic factory WT sum
+    let spesifikWt = 480; 
+    let totalWtPabrik = 0; 
 
     scheduleDataList.forEach(s => {
         if (s.tglFull === currentTglIso && s.shift === currentActiveShift) {
-            
-            totalWtPabrik += parseFloat(s.wt) || 0; // Total dari seluruh jadwal berjalan
-            
-            // Ambil WT spesifik mesin ini yang produknya sedang berjalan (jika diubah dari 480)
+            totalWtPabrik += parseFloat(s.wt) || 0; 
             if (s.mesin === currentMachine && s.produk.trim() === mData.currentProduct.trim()) {
                 let wtJadwal = parseFloat(s.wt);
                 if (!isNaN(wtJadwal) && wtJadwal > 0) {
@@ -1128,16 +1112,13 @@ function updateBreakdownUI() {
         }
     });
 
-    // Fallback keamanan jika nilai tidak valid atau tidak ada jadwal
     if (totalWtPabrik <= 0) totalWtPabrik = 480; 
     if (spesifikWt <= 0) spesifikWt = 480;
 
-    // --- Render Akumulasi TOTAL PABRIK dengan Persentase (Berdasarkan Total WT Pabrik) ---
     let tpProd = totalPabrik.production / 60;
     let tpMaint = totalPabrik.maintenance / 60;
     let tpPpic = totalPabrik.ppic / 60;
 
-    // Hitung persentase terhadap Total Scheduled Working Time Pabrik
     let percTpProd = ((tpProd / totalWtPabrik) * 100).toFixed(1);
     let percTpMaint = ((tpMaint / totalWtPabrik) * 100).toFixed(1);
     let percTpPpic = ((tpPpic / totalWtPabrik) * 100).toFixed(1);
@@ -1146,12 +1127,10 @@ function updateBreakdownUI() {
     document.getElementById('global-val-maint').innerHTML = `${tpMaint.toFixed(1)} <br><span style="font-size:0.65em; font-weight:normal;">(${percTpMaint}%)</span>`;
     document.getElementById('global-val-ppic').innerHTML = `${tpPpic.toFixed(1)} <br><span style="font-size:0.65em; font-weight:normal;">(${percTpPpic}%)</span>`;
 
-    // --- Render Akumulasi SPESIFIK MESIN dengan Persentase (Berdasarkan WT Spesifik) ---
     let mProd = bd.accumulated.production / 60;
     let mMaint = bd.accumulated.maintenance / 60;
     let mPpic = bd.accumulated.ppic / 60;
 
-    // Hitung persentase terhadap Scheduled Working Time Spesifik Mesin
     let percMProd = ((mProd / spesifikWt) * 100).toFixed(1);
     let percMMaint = ((mMaint / spesifikWt) * 100).toFixed(1);
     let percMPpic = ((mPpic / spesifikWt) * 100).toFixed(1);
@@ -1175,7 +1154,6 @@ setInterval(() => {
             document.getElementById('bd-timer').innerText = `${h}:${m}:${s}`;
         }
     }
-    // TAMBAHAN: Panggil setiap detik agar jika terlewat, modal tetap dipaksa muncul
     checkPendingModal();
 }, 1000);
 
@@ -1222,10 +1200,9 @@ function initTampilanCharts() {
         options: {
             responsive: true, 
             maintainAspectRatio: false, 
-            animation: false, // --- PERBAIKAN: MATIKAN ANIMASI GLOBAL AGAR SCROLLING MULUS TIDAK KERITING ---
+            animation: false, 
             plugins: { 
                 legend: { display: false },
-                // UBAHAN INTEGRASI INFLUX: Konfigurasi agar grafik bisa di-zoom dan di-pan
                 zoom: {
                     pan: { 
                         enabled: true, 
@@ -1263,23 +1240,19 @@ function initTampilanCharts() {
     });
 }
 
-// --- FUNGSI RESET TAMPILAN ORDER ---
-// Diperbarui agar "Actual Output" dan parameter angka lainnya aman jatuh ke nilai 0 (Bukan "-")
 function resetTampilanOrder() {
     let elKode = document.getElementById('tampilan-kode-mat'); if(elKode) elKode.innerText = "-";
     let elT100 = document.getElementById('tampilan-target100'); if(elT100) elT100.innerText = "0";
     let elIdSp = document.getElementById('tampilan-ideal-speed'); if(elIdSp) elIdSp.innerText = "0 m/min";
     let elWt = document.getElementById('tampilan-wt'); if(elWt) elWt.innerText = "0 Min";
-    let elAct = document.getElementById('tampilan-actual'); if(elAct) elAct.innerText = "0 Crt"; // UBAHAN: Default ke 0, bukan "-"
+    let elAct = document.getElementById('tampilan-actual'); if(elAct) elAct.innerText = "0 Crt"; 
     let elAvgSp = document.getElementById('tampilan-avg-speed'); if(elAvgSp) elAvgSp.innerText = "0.00 Crt/Min";
     let elEff = document.getElementById('tampilan-eff'); if(elEff) elEff.innerText = "0.00%";
 
-    // TAMBAHAN: Reset tampilan downtime per kategori
     let elDtMtc = document.getElementById('tampilan-dt-mtc'); if(elDtMtc) elDtMtc.innerText = "0 Min";
     let elDtProd = document.getElementById('tampilan-dt-prod'); if(elDtProd) elDtProd.innerText = "0 Min";
     let elDtPpic = document.getElementById('tampilan-dt-ppic'); if(elDtPpic) elDtPpic.innerText = "0 Min";
 
-    // TAMBAHAN: Reset field Total DT dan OpTime
     let elDtTotal = document.getElementById('tampilan-detail-downtime'); if(elDtTotal) elDtTotal.innerText = "0 Min";
     let elOpTime = document.getElementById('tampilan-detail-optime'); if(elOpTime) elOpTime.innerText = "0 Min";
 }
@@ -1297,21 +1270,16 @@ function updateTampilanUI() {
     let isCurrentlyBd = mData.breakdown.isActive;
     let productToCheck = mData.currentProduct;
 
-    // --- PERBAIKAN MUTLAK LOGIKA PENCARIAN JADWAL ---
-    // Cari semua jadwal untuk mesin ini di shift ini
     let matchingScheds = scheduleDataList.filter(s => 
         s.tglFull === currentTglIso && 
         s.shift === currentActiveShift && 
         s.mesin === currentMachine
     );
 
-    // Utamakan jadwal yang sesuai dengan produk yang sedang jalan
     let activeSched = matchingScheds.find(s => s.produk.trim() === productToCheck.trim());
     
-    // JIKA TIDAK KETEMU BERDASARKAN PRODUK (Misal mesin sedang IDLE / BELUM ADA JADWAL tapi jadwal sudah dibuat)
-    // MAKA PAKSA TETAP TAMPILKAN JADWAL tersebut agar layarnya tidak kosong "-"
     if (!activeSched && matchingScheds.length > 0) {
-        activeSched = matchingScheds[matchingScheds.length - 1]; // Ambil jadwal yang terakhir kali ditambahkan
+        activeSched = matchingScheds[matchingScheds.length - 1];
     }
 
     let isIdle = productToCheck.includes("IDLE") || productToCheck.includes("BELUM ADA JADWAL") || productToCheck === "";
@@ -1319,7 +1287,6 @@ function updateTampilanUI() {
     let kondisiEl = document.getElementById('tampilan-kondisi');
     let produkEl = document.getElementById('tampilan-produk');
 
-    // --> Determine the exact product name for image fetching
     let finalProductName = activeSched ? activeSched.produk.trim() : productToCheck.trim();
 
     if (isCurrentlyBd) {
@@ -1336,16 +1303,12 @@ function updateTampilanUI() {
         if (produkEl) { produkEl.innerText = finalProductName; produkEl.style.color = "var(--accent-color)"; }
     }
 
-    // ==========================================
-    // LOGIKA UPDATE GAMBAR PRODUK & SPEC SHEET
-    // ==========================================
     let imgProduk = document.getElementById('tampilan-img-produk');
     let placeholderProduk = document.getElementById('tampilan-img-produk-placeholder');
     let imgSpec = document.getElementById('tampilan-img-spec');
     let placeholderSpec = document.getElementById('tampilan-img-spec-placeholder');
 
     if (imgProduk && placeholderProduk && imgSpec && placeholderSpec) {
-        // Jika mesin sedang jalan atau ada jadwal yang di-set (tidak murni kosong/idle tanpa jadwal)
         if (finalProductName && !finalProductName.includes("IDLE") && !finalProductName.includes("BELUM ADA JADWAL")) {
             
             let extensions = ['.jpg', '.png', '.jpeg', '.webp', '.JPG', '.PNG', '.JPEG'];
@@ -1379,7 +1342,6 @@ function updateTampilanUI() {
             tryLoadImage(imgSpec, placeholderSpec, basePathSpec, 0, errorSpec);
 
         } else {
-            // Jika IDLE mutlak
             imgProduk.style.display = 'none';
             placeholderProduk.style.display = 'block';
             
@@ -1387,9 +1349,7 @@ function updateTampilanUI() {
             placeholderSpec.style.display = 'block';
         }
     }
-    // ==========================================
 
-    // UBAHAN: Parameter Default di-set ke nilai 0 (Bukan "-")
     let schedWt = "0 Min";
     let schedActual = "0 Crt";
     let schedAvgSpeed = "0.00 Crt/Min";
@@ -1399,10 +1359,9 @@ function updateTampilanUI() {
     let schedDtProd = "0 Min";
     let schedDtPpic = "0 Min";
 
-    let schedDtTotal = "0 Min"; // UBAHAN: Default untuk Total Downtime
-    let schedOpTime = "0 Min";  // UBAHAN: Default untuk Operating Time
+    let schedDtTotal = "0 Min"; 
+    let schedOpTime = "0 Min";  
 
-    // --- KINI DATA AKAN SELALU MUNCUL MESKI MESIN SEDANG BREAKDOWN ATAU IDLE SELAMA ADA JADWAL ---
     if(activeSched) { 
         if(typeof dataProduksi !== 'undefined') {
             let prodDetail = dataProduksi.find(item => item["NAMA MESIN"] === currentMachine && item["NAMA PRODUK"].trim() === activeSched.produk.trim());
@@ -1431,8 +1390,8 @@ function updateTampilanUI() {
         schedDtProd = (activeSched.dtProd !== undefined ? activeSched.dtProd : 0) + " Min";
         schedDtPpic = (activeSched.dtPpic !== undefined ? activeSched.dtPpic : 0) + " Min";
 
-        schedDtTotal = (activeSched.dtTotal !== undefined ? activeSched.dtTotal : 0) + " Min"; // Ambil Total DT dari jadwal
-        schedOpTime = (activeSched.opTime !== undefined ? activeSched.opTime : 0) + " Min"; // Ambil OpTime dari jadwal
+        schedDtTotal = (activeSched.dtTotal !== undefined ? activeSched.dtTotal : 0) + " Min"; 
+        schedOpTime = (activeSched.opTime !== undefined ? activeSched.opTime : 0) + " Min"; 
 
         if(activeSched.opTime > 0) {
              let avgSpeed = (activeSched.actual / activeSched.opTime).toFixed(2);
@@ -1444,7 +1403,6 @@ function updateTampilanUI() {
         resetTampilanOrder();
     }
     
-    // PEMBARUAN AMAN: Hanya mengubah jika elemen HTML-nya memang ada
     let elWt = document.getElementById('tampilan-wt'); if(elWt) elWt.innerText = schedWt;
     let elAct = document.getElementById('tampilan-actual'); if(elAct) elAct.innerText = schedActual;
     let elAvgSp = document.getElementById('tampilan-avg-speed'); if(elAvgSp) elAvgSp.innerText = schedAvgSpeed;
@@ -1562,10 +1520,9 @@ function switchPage(pageId) {
     // --- FITUR BARU: PASSWORD UNTUK MENU SCHEDULE ---
     if (pageId === 'schedule') {
         let pass = prompt("Masukkan Password untuk mengakses halaman Schedule Produksi:");
-        // Silakan ganti "admin123" dengan password yang kamu mau
         if (pass !== "admin123") { 
             alert("Password Salah! Akses ditolak.");
-            return; // Membatalkan pindah halaman jika password salah
+            return; 
         }
     }
     // ------------------------------------------------
@@ -1631,7 +1588,6 @@ function switchPage(pageId) {
         initAnalisaPage();
     }
 
-    // TAMBAHAN: Panggil checkPendingModal agar saat pindah menu, modal DT langsung muncul tanpa delay
     checkPendingModal();
 }
 
@@ -1751,7 +1707,6 @@ function switchMachine() {
     updateTampilanUI();
     fetchHistoryFromLocal(currentMachine);
     
-    // TAMBAHAN: Panggil pengecekan modal DT langsung
     checkPendingModal();
 }
 
@@ -1776,7 +1731,6 @@ function setRunningProduct(index) {
 
     mData.currentProduct = dataJadwal.produk.trim();
 
-    // Simpan state Selektor "Pilih Run" ke Firebase
     fetch(`https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/active_runs/${dataJadwal.mesin}.json`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -1791,11 +1745,10 @@ function setRunningProduct(index) {
     if(document.getElementById('page-dashboard').classList.contains('active')) refreshDashboardUI();
     if(document.getElementById('page-tampilan').classList.contains('active') && currentMachine === dataJadwal.mesin) {
         updateTampilanUI();
-        fetchHistoryFromLocal(currentMachine); // UBAHAN: Tarik histori jika product direfresh
+        fetchHistoryFromLocal(currentMachine);
     }
     if(document.getElementById('page-schedule').classList.contains('active')) renderScheduleTable();
     
-    // Agar nilai Akumulasi Spesifik Mesin yang tampil saat ini otomatis mereset ke nol (untuk produk baru)
     updateBreakdownUI();
 }
 
@@ -1806,6 +1759,7 @@ setInterval(() => {
         let oldShift = currentActiveShift;
         let currentTglIso = getFactoryDateIso();
         
+        isShiftTransition = true; // KUNCI AGAR TABEL TIDAK KETABRAK DATA LAMA
         console.log(`[SHIFT CHANGE] Transisi ke ${newShift}. Resolving active downtime for old shift...`);
         
         // 1. AUTO RESOLVE DOWNTIME YANG MASIH GANTUNG KE SHIFT LAMA (Sebagai Production)
@@ -1852,6 +1806,9 @@ setInterval(() => {
             }).then(() => console.log(`[SHIFT CHANGE] Data timbangan mesin ${id} dibersihkan otomatis.`))
               .catch(e => console.error(e));
         });
+        
+        // Buka kunci polling setelah delay 10 detik (Beri waktu Firebase benar-benar kosong dulu)
+        setTimeout(() => { isShiftTransition = false; }, 10000);
         // -----------------------------------------------------------------
         
         // 3. Reset parameter running shift baru
@@ -1906,13 +1863,11 @@ setInterval(() => {
 
         scheduleDataList.forEach((d, index) => {
 
-            // --- PERBAIKAN MUTLAK SINKRONISASI DOWNTIME SCHEDULE (TanPA Math.ceil & Aman Mismatch) ---
             let sumProd = 0, sumMtc = 0, sumPpic = 0;
             let sKey = d.mesin + "_" + d.tglFull + "_" + d.shift;
             let countForThisMac = schedCounts[sKey] || 1;
 
             allBreakdownEvents.forEach(ev => {
-                // Gunakan Regex untuk menghapus semua karakter selain huruf dan angka agar match 100%
                 let evProd = (ev.product || "").replace(/[^a-z0-9]/gi, '').toLowerCase();
                 let dProd = (d.produk || "").replace(/[^a-z0-9]/gi, '').toLowerCase();
                 
@@ -1923,15 +1878,10 @@ setInterval(() => {
                 let dShift = (d.shift || "").trim().toLowerCase();
 
                 if (ev.type === 'END' && evMac === dMac && evShift === dShift) {
-                    // Fallback pengecekan tglFull di jadwal apabila undefined pada data Firebase lama
                     let isDateMatch = (ev.date === d.tglFull) || (!d.tglFull); 
 
                     if (isDateMatch) {
                         let isProductMatch = false;
-                        
-                        // LOGIKA SUPER AMAN:
-                        // Jika user ganti nama produk di tabel, ev.product lama tidak akan match.
-                        // Jadi, kalau jadwal untuk mesin ini di shift ini cuma 1, LANGSUNG MASUKKAN (bypass cek nama produk).
                         if (evProd === dProd) {
                             isProductMatch = true;
                         } else if (countForThisMac === 1) {
@@ -1950,15 +1900,10 @@ setInterval(() => {
                 }
             });
 
-            // Tampilkan seperti di KPI Dashboard, float dibatasi 1 desimal.
             d.dtProd = parseFloat(sumProd.toFixed(1));
             d.dtMtc = parseFloat(sumMtc.toFixed(1));
             d.dtPpic = parseFloat(sumPpic.toFixed(1));
-            // -----------------------------------------------------------------------------------------
 
-            // ===========================
-            // RUMUS PERBAIKAN START
-            // ===========================
             let workingTime = parseFloat(d.wt) || 0;
             let totalDtAll = parseFloat(d.dtMtc || 0) + parseFloat(d.dtPpic || 0) + parseFloat(d.dtProd || 0);
             
@@ -1983,15 +1928,11 @@ setInterval(() => {
             d.availMachine = availMachinePerc.toFixed(2) + '%';
             d.perf = performance.toFixed(2) + '%';
             d.oee = oee.toFixed(2) + '%';
-            // ===========================
-            // RUMUS PERBAIKAN END
-            // ===========================
 
             if (d.tglFull === currentTglIso && d.shift === currentActiveShift) {
                 let mac = d.mesin;
                 let mData = machineData[mac];
                 
-                // Perbandingan aman menggunakan trim
                 let isProductRunning = (mData.currentProduct.trim() === d.produk.trim());
 
                 if (isQualityPageActive && isProductRunning) {
@@ -2005,10 +1946,8 @@ setInterval(() => {
                 }
             }
             
-            // --- UPDATE DOM TERLEPAS DARI SHIFT AKTIF AGAR EDITAN DI SHIFT LALU JUGA KALKULASI ULANG ---
             if (isSchedulePageActive) {
                 let cellActual = document.getElementById(`sched-actual-${index}`);
-                // Hindari overwrite value jika kursor sedang berada pada cell actual output agar bisa di edit
                 if (cellActual && document.activeElement !== cellActual) {
                     cellActual.value = d.actual;
                 }
@@ -2041,7 +1980,6 @@ setInterval(() => {
         });
     }
 
-    // Mencegah Render setiap detik jika halamannya tidak aktif
     if(isSchedulePageActive) {
         // Biarkan saja tabelnya statis sampai user refresh atau klik, agar tidak mengganggu fokus klik & edit
     } else if(document.getElementById('page-production').classList.contains('active')) {
@@ -2074,10 +2012,8 @@ function exportAndClearSchedule() {
         return;
     }
 
-    // --- UBAHAN PERBAIKAN: Hanya Backup & Hapus jadwal HARI SEBELUMNYA ---
     let todayIso = getFactoryDateIso();
 
-    // Pisahkan mana jadwal masa lalu (tanggal < hari ini) dan masa depan/hari ini
     let pastSchedules = scheduleDataList.filter(s => s.tglFull < todayIso);
     let activeSchedules = scheduleDataList.filter(s => s.tglFull >= todayIso);
 
@@ -2090,13 +2026,12 @@ function exportAndClearSchedule() {
         return;
     }
 
-    isResettingSchedule = true; // KUNCI PROSES FETCH REALTIME
+    isResettingSchedule = true; 
 
     console.log("Sedang mengirim backup data Schedule masa lalu ke InfluxDB...");
     fetch('https://marvelous-undamaged-flagship.ngrok-free.dev/api/write-schedule', { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        // HANYA MENGIRIM JADWAL MASA LALU KE INFLUXDB
         body: JSON.stringify(pastSchedules)
     })
     .then(res => {
@@ -2105,21 +2040,18 @@ function exportAndClearSchedule() {
     })
     .then(msg => {
         console.log("[INFLUXDB] " + msg);
-        // Lanjutkan ke proses pembuatan CSV dan penghapusan Firebase JIKA backup sukses
         lanjutkanExportDanClear(pastSchedules, activeSchedules);
     })
     .catch(err => {
         console.error(err);
         alert("Gagal mem-backup data ke InfluxDB! Proses hapus dibatalkan demi keamanan histori Anda.");
-        isResettingSchedule = false; // Buka kunci lagi
+        isResettingSchedule = false; 
     });
 }
 
 function lanjutkanExportDanClear(pastSchedules, activeSchedules) {
-    // 1. Buat isi file CSV (Hanya data masa lalu)
     let csvContent = "data:text/csv;charset=utf-8,";
     
-    // Header CSV
     let headers = [
         "Bulan", "Tanggal", "Shift", "Working Time (Menit)", "Nama Mesin", 
         "Nama Produk", "Lebar Jumbo", "Target 100% (CRT)", "Target 70% (CRT)", 
@@ -2130,7 +2062,6 @@ function lanjutkanExportDanClear(pastSchedules, activeSchedules) {
     ];
     csvContent += headers.join(",") + "\r\n";
 
-    // Isi Data Baris (Hanya data masa lalu)
     pastSchedules.forEach(d => {
         let row = [
             `"${d.bulan}"`, `"${d.tgl}"`, `"${d.shift}"`, `"${d.wt}"`, `"${d.mesin}"`, 
@@ -2143,7 +2074,6 @@ function lanjutkanExportDanClear(pastSchedules, activeSchedules) {
         csvContent += row.join(",") + "\r\n";
     });
 
-    // 2. Trigger Download File
     let encodedUri = encodeURI(csvContent);
     let link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -2156,10 +2086,8 @@ function lanjutkanExportDanClear(pastSchedules, activeSchedules) {
     link.click();
     document.body.removeChild(link);
 
-    // 3. Update Memori Browser: Sisakan jadwal yang masih aktif (hari ini / masa depan)
     scheduleDataList = activeSchedules;
 
-    // 4. Hapus HANYA jadwal masa lalu dari Firebase RTDB
     let deletePromises = pastSchedules.map(s => {
         if (s.firebaseKey) {
             return fetch(`https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/schedules/${s.firebaseKey}.json`, {
@@ -2176,7 +2104,6 @@ function lanjutkanExportDanClear(pastSchedules, activeSchedules) {
         updateScheduleMaintenanceStats();
         if(document.getElementById('page-schedule-maintenance').classList.contains('active')) renderQualityTable();
         
-        // Lepas pengunci setelah delay 3 detik agar firebase aman dari objek nyasar
         setTimeout(() => { isResettingSchedule = false; }, 3000);
     }).catch(e => {
         console.error("Error menghapus jadwal lama:", e);
@@ -2225,7 +2152,6 @@ function renderElectricityTable() {
         let isIdle = mData.currentProduct.includes("IDLE") || mData.currentProduct.includes("BELUM ADA JADWAL");
         let isBd = mData.breakdown.isActive;
 
-        // PERBAIKAN LOGIKA STATUS LAMPU: Tidak ada jadwal = Mati
         let statusLed = '';
         if (!hasSchedule || isIdle) {
             statusLed = '<i class="fa-solid fa-circle" style="color:var(--danger); font-size:0.6em;"></i> Mati/Idle';
@@ -2235,14 +2161,12 @@ function renderElectricityTable() {
             statusLed = '<i class="fa-solid fa-circle" style="color:var(--success); font-size:0.6em;"></i> Menyala';
         }
 
-        // --- UBAHAN TABEL ELECTRICITY: Menarik data aktual hasil akumulasi SHIFT LANGSUNG DARI MESIN ---
         let actualKwh = mData.kwhShift || 0;
         let actualCost = mData.costShift || 0;
         
         totalFactoryKwh += actualKwh;
         totalFactoryCost += actualCost;
 
-        // PERBAIKAN TAMPILAN KW: Jika idle/mati, paksa tampilkan 0 kW agar tidak membingungkan
         let livePower = (!hasSchedule || isIdle) ? 0 : (mData.livePowerKw || 0); 
 
         tbodyElec.innerHTML += `<tr>
@@ -2281,7 +2205,6 @@ function saveProductionUpdate() {
 
     machineData[machineId].currentProduct = selectedProduct;
 
-    // Simpan state "Set Produk" manual ke Firebase
     fetch(`https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/active_runs/${machineId}.json`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -2305,13 +2228,11 @@ function saveProductionUpdate() {
     refreshDashboardUI(); 
     updateTampilanUI();
     
-    // Agar nilai Akumulasi Spesifik Mesin yang tampil saat ini otomatis mereset ke nol (untuk produk baru)
     updateBreakdownUI();
 
     alert(`Produksi Line ${machineId} berhasil diupdate menjadi: ${selectedProduct}`);
 }
 
-/* FUNGSI UNTUK KALKULASI DATA OEE & SCHEDULE */
 function initSchedulePage() {
     if(typeof dataProduksi === 'undefined') {
         console.warn("File dataProduksi.js belum ditemukan atau belum dimuat!");
@@ -2343,10 +2264,8 @@ function updateScheduleProducts() {
         selProd.innerHTML += `<option value="${p["NAMA PRODUK"]}">${p["NAMA PRODUK"]}</option>`;
     });
 
-    // TAMBAHAN: Opsi Lainnya untuk produk baru
     selProd.innerHTML += `<option value="Lainnya">-- Lainnya (Ketik Manual) --</option>`;
 
-    // Buat elemen input manual jika belum ada (Tanpa edit HTML)
     if (!document.getElementById('schedProductManual')) {
         let inputManual = document.createElement('input');
         inputManual.type = 'text';
@@ -2376,10 +2295,9 @@ function updateScheduleDetails() {
     if (prodName === 'Lainnya') {
         if(manualInput) {
             manualInput.style.display = 'block';
-            manualInput.value = ''; // Reset form manual
+            manualInput.value = ''; 
         }
         
-        // Buka kunci (Enable) input agar bisa diketik manual
         kodeMatEl.disabled = false;
         kodeMatEl.value = "";
         kodeMatEl.style.backgroundColor = "#ffffff";
@@ -2390,14 +2308,12 @@ function updateScheduleDetails() {
         lebarEl.style.backgroundColor = "#ffffff";
         lebarEl.placeholder = "Ketik Lebar Jumbo...";
         
-        // Target dan Speed di-set 0 (Bisa di-edit inline di tabel nanti)
         document.getElementById('schedT100').innerText = "0";
         document.getElementById('schedT70').innerText = "0";
         document.getElementById('schedSpeed').innerText = "0";
     } else {
         if(manualInput) manualInput.style.display = 'none';
         
-        // Kunci kembali input (Disable)
         kodeMatEl.disabled = true;
         kodeMatEl.style.backgroundColor = "#f8fafc";
         kodeMatEl.placeholder = "";
@@ -2434,7 +2350,6 @@ function calculateAndAddSchedule() {
     let mesin = document.getElementById('schedMachine').value;
     let produk = document.getElementById('schedProduct').value;
     
-    // --- TAMBAHAN: Tarik Data Manual Jika Pilih Lainnya ---
     if (produk === 'Lainnya') {
         let manualInput = document.getElementById('schedProductManual');
         produk = manualInput ? manualInput.value.trim() : "";
@@ -2444,18 +2359,17 @@ function calculateAndAddSchedule() {
     let kodeMat = document.getElementById('schedKodeMat').value || "-";
     let lebar = document.getElementById('schedLebar').value || "-";
 
-    // --- TAMBAHAN LOGIKA QUANTITY LOAD & JAM MULAI - SELESAI ---
     let jamMulaiInput = document.getElementById('schedJamMulai').value;
     let jamSelesaiInput = document.getElementById('schedJamSelesai').value;
     
-    let workingTime = 480; // Default 8 jam (480 menit)
+    let workingTime = 480; 
     if (jamMulaiInput && jamSelesaiInput) {
         let startTime = new Date(`1970-01-01T${jamMulaiInput}:00`);
         let endTime = new Date(`1970-01-01T${jamSelesaiInput}:00`);
         
         let diffMs = endTime - startTime;
         if(diffMs < 0) {
-            diffMs += 24 * 60 * 60 * 1000; // Jika melewati tengah malam
+            diffMs += 24 * 60 * 60 * 1000; 
         }
         workingTime = Math.round(diffMs / 60000);
     }
@@ -2468,7 +2382,6 @@ function calculateAndAddSchedule() {
         if (target100 <= 0) {
             return alert("Target 100% produk ini masih 0. Sistem tidak bisa menghitung auto-schedule. Silakan isi Manual atau pastikan Target 100% valid.");
         }
-        // Menghitung jumlah shift yang dibutuhkan (pembulatan ke atas)
         shiftsToGenerate = Math.ceil(qtyLoad / target100);
         
         if (!confirm(`Total Load: ${qtyLoad} Crt\nTarget per-Shift: ${target100} Crt\n\nSistem akan membuat jadwal otomatis sebanyak ${shiftsToGenerate} Shift berturut-turut. Lanjutkan?`)) {
@@ -2476,18 +2389,14 @@ function calculateAndAddSchedule() {
         }
     }
 
-    // Setup base index shift (Shift 1 = 0, Shift 2 = 1, Shift 3 = 2)
     let baseShiftIndex = parseInt(shiftVal.replace("Shift ", "")) - 1;
     
-    // Parse Local Date agar aman dari zona waktu (menghindari lompat hari)
     let baseDateParts = tglVal.split('-');
     let baseDateObj = new Date(baseDateParts[0], baseDateParts[1] - 1, baseDateParts[2]); 
     
     let addedCount = 0;
 
-    // Looping sebanyak jumlah shift yang dibutuhkan
     for (let i = 0; i < shiftsToGenerate; i++) {
-        // Kalkulasi matematika perputaran shift dan hari
         let currentShiftOffset = baseShiftIndex + i;
         let daysToAdd = Math.floor(currentShiftOffset / 3);
         let finalShiftIndex = currentShiftOffset % 3;
@@ -2496,7 +2405,6 @@ function calculateAndAddSchedule() {
         let iterDateObj = new Date(baseDateObj.getTime());
         iterDateObj.setDate(iterDateObj.getDate() + daysToAdd);
 
-        // Format tanggal kembali untuk iterasi ini
         let iterY = iterDateObj.getFullYear();
         let iterM = String(iterDateObj.getMonth() + 1).padStart(2, '0');
         let iterD = String(iterDateObj.getDate()).padStart(2, '0');
@@ -2506,14 +2414,11 @@ function calculateAndAddSchedule() {
         let iterBulanStr = bulanArr[iterDateObj.getMonth()];
         let iterTglStr = iterD;
 
-        // Cek duplikasi
         let exists = scheduleDataList.find(s => s.tglFull === iterTglVal && s.shift === finalShiftVal && s.mesin === mesin && s.produk === produk);
         if(exists) {
-            // Jika user hanya menambahkan 1 jadwal manual tapi sudah ada, kasih error
             if (shiftsToGenerate === 1) {
                 return alert(`Penjadwalan untuk Mesin ${mesin} dengan produk ${produk} pada Tanggal ${iterTglVal} ${finalShiftVal} sudah ada!`);
             } else {
-                // Jika sedang auto-generate banyak shift dan menemukan bentrok, lewati baris yang ini saja
                 console.warn(`Melewati pembuatan jadwal ${iterTglVal} ${finalShiftVal} karena sudah terisi.`);
                 continue; 
             }
@@ -2522,16 +2427,18 @@ function calculateAndAddSchedule() {
         let existingCount = scheduleDataList.filter(s => s.tglFull === iterTglVal && s.shift === finalShiftVal && s.mesin === mesin).length;
         let isFirst = (existingCount === 0);
 
-        // --- MENGAMBIL DATA AKTUAL JIKA JADWAL DIBUAT TERLAMBAT (Diambil otomatis oleh pipeline Firebase real-time) ---
+        // --- FITUR BARU: MENGAMBIL DATA AKTUAL JIKA JADWAL DIBUAT TERLAMBAT ---
+        // Jika Anda mensetting jadwal ini untuk SHIFT SELANJUTNYA, maka actual WAJIB diawali 0.
+        // Nanti saat shiftnya aktif, polling akan mencocokan otomatis.
         let initialActual = 0;
 
         let newEntry = {
-            idJadwal: Date.now() + i, // Ditambah variabel iterasi agar ID nya tetap unik meskipun dieksekusi super cepat
+            idJadwal: Date.now() + i, 
             tglFull: iterTglVal,
             bulan: iterBulanStr,
             tgl: iterTglStr,
             shift: finalShiftVal,
-            wt: workingTime, // Dinamis menggunakan variabel yang dikalkulasi di atas
+            wt: workingTime, 
             mesin: mesin,
             produk: produk,
             lebar: lebar,
@@ -2565,7 +2472,6 @@ function calculateAndAddSchedule() {
         scheduleDataList.push(newEntry);
         addedCount++;
         
-        // Simpan ke Firebase via POST
         fetch('https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/schedules.json', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -2578,13 +2484,11 @@ function calculateAndAddSchedule() {
         .catch(err => console.error(err));
     }
 
-    // Set produk berjalan jika mesin sedang idle (Hanya update untuk jadwal pertama)
     let mData = machineData[mesin];
     if(mData && (mData.currentProduct.includes("IDLE") || mData.currentProduct.includes("BELUM ADA JADWAL"))) {
         mData.currentProduct = produk.trim();
     }
 
-    // Reset kotak input agar tidak nyangkut untuk penjadwalan berikutnya
     if (qtyLoadInput) qtyLoadInput.value = "";
     if (document.getElementById('schedJamMulai')) document.getElementById('schedJamMulai').value = "";
     if (document.getElementById('schedJamSelesai')) document.getElementById('schedJamSelesai').value = "";
@@ -2603,28 +2507,23 @@ function calculateAndAddSchedule() {
     }
 }
 
-// FUNGSI BARU EDIT INLINE: Update nilai sel jadwal dan simpan ke Firebase otomatis
 function updateScheduleInline(index, field, value) {
     let sched = scheduleDataList[index];
     if (!sched) return;
 
     let mac = sched.mesin;
     let mData = machineData[mac];
-    // Cek apakah schedule ini yang sedang aktif berjalan SEBELUM value diubah
     let isCurrentlyRunning = (mData && mData.currentProduct.trim() === sched.produk.trim());
 
-    // Parsing data numerik atau biarkan sebagai string
     if (field === 'wt' || field === 't100' || field === 't70' || field === 'actual' || field === 'speed') {
         sched[field] = parseFloat(value) || 0;
     } else {
         sched[field] = value;
     }
 
-    // Jika field yang diubah adalah 'produk' dan ini adalah schedule yang sedang running, update currentProduct
     if (field === 'produk' && isCurrentlyRunning) {
         mData.currentProduct = value.trim();
         
-        // Simpan state Selektor "Pilih Run" ke Firebase agar tidak hilang status running-nya
         fetch(`https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/active_runs/${mac}.json`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -2636,7 +2535,6 @@ function updateScheduleInline(index, field, value) {
         }).catch(e => console.error(e));
     }
 
-    // Sync data editan ke Firebase
     if (sched.firebaseKey && !isResettingSchedule) {
         let payload = {};
         payload[field] = sched[field];
@@ -2647,12 +2545,11 @@ function updateScheduleInline(index, field, value) {
         }).catch(e => console.error("Gagal update data jadwal:", e));
     }
     
-    // Perbarui UI terkait
     if(document.getElementById('page-schedule-maintenance').classList.contains('active')) {
         renderQualityTable();
     }
     if(document.getElementById('page-tampilan').classList.contains('active')) {
-        updateTampilanUI(); // Sinkronisasi otomatis ke halaman tampilan!
+        updateTampilanUI(); 
     }
 }
 
@@ -2668,7 +2565,6 @@ function renderScheduleTable() {
 
     let currentTglIso = getFactoryDateIso();
 
-    // Menghitung berapa banyak produk yang dijadwalkan pada 1 mesin di shift ini
     let machineSchedCount = {};
     scheduleDataList.forEach(s => {
         if (s.tglFull === currentTglIso && s.shift === currentActiveShift) {
@@ -2695,7 +2591,6 @@ function renderScheduleTable() {
             selectorHtml = `<input type="radio" disabled title="Hanya bisa dipilih pada hari & shift yang sesuai">`;
         }
 
-        // --- UBAHAN INLINE EDIT: Konversi 7 Td menjadi Input agar bisa diedit secara bebas
         let inputStyle = 'width: 100%; border: none; background: transparent; text-align: center; font-weight: inherit; color: inherit; font-size: inherit; font-family: inherit; outline: none; border-bottom: 1px dashed rgba(0,0,0,0.3); cursor: text; padding: 2px 0;';
 
         let wtInput = `<input type="number" value="${d.wt}" onchange="updateScheduleInline(${index}, 'wt', this.value)" style="${inputStyle} width: 60px;">`;
@@ -2706,7 +2601,6 @@ function renderScheduleTable() {
         let actualInput = `<input type="number" id="sched-actual-${index}" value="${d.actual}" onchange="updateScheduleInline(${index}, 'actual', this.value)" style="${inputStyle} width: 60px; color: red;">`;
         let speedInput = `<input type="number" step="0.001" id="sched-speed-${index}" value="${d.speed}" onchange="updateScheduleInline(${index}, 'speed', this.value)" style="${inputStyle} width: 60px; color: #0284c7;">`;
 
-        // --- PERBAIKAN TAMPILAN COST LISTRIK ---
         let costDisplay = `<div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
             <i class="fa-solid fa-bolt" style="color: #f59e0b; filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.4)); font-size: 1.1em;"></i>
             <span style="letter-spacing: 0.5px;">${d.costListrik !== undefined ? formatRupiah(d.costListrik) : 'Rp 0'}</span>
@@ -2754,7 +2648,6 @@ function renderScheduleTable() {
 let analisaSpeedChartInstance = null;
 let analisaCostChartInstance = null;
 let analisaKwChartInstance = null;
-// --- TAMBAHAN BARU: Variabel untuk OEE Bar Chart dan Table Histori Schedule ---
 let analisaOeeChartInstance = null;
 let analisaReportData = [];
 let analisaScheduleHistoryData = []; 
@@ -2762,7 +2655,6 @@ let analisaScheduleHistoryData = [];
 function initAnalisaPage() {
     let sel = document.getElementById('analisaMachineSelect');
     if(sel.options.length === 0) {
-        // Tambahkan opsi Semua Mesin untuk grafik OEE agar bisa menampilkan perbandingan
         sel.innerHTML = `<option value="ALL">Semua Mesin</option>`;
         rawMachineList.forEach(id => {
             sel.innerHTML += `<option value="${id}">${machineData[id].name}</option>`;
@@ -2771,7 +2663,7 @@ function initAnalisaPage() {
     if (!document.getElementById('analisaStartDate').value) {
         let currentTglIso = getFactoryDateIso();
         
-        let firstDay = currentTglIso.slice(0, 8) + '01'; // Tanggal 1 bulan ini
+        let firstDay = currentTglIso.slice(0, 8) + '01'; 
         document.getElementById('analisaStartDate').value = firstDay;
         document.getElementById('analisaEndDate').value = currentTglIso;
         
@@ -2829,7 +2721,6 @@ function initAnalisaCharts() {
         });
     }
 
-    // --- TAMBAHAN BARU: Inisialisasi Grafik OEE ---
     const ctxOee = document.getElementById('analisaOeeChart');
     if (ctxOee) {
         analisaOeeChartInstance = new Chart(ctxOee.getContext('2d'), {
@@ -2874,7 +2765,6 @@ function generateAnalisaReport() {
         endIso = `${endVal}T23:59:59Z`;
     }
 
-    // 1. Mengambil data report agregasi Sensor (Speed, Daya, Cost) dari InfluxDB Server
     fetch(`https://marvelous-undamaged-flagship.ngrok-free.dev/api/report-sensor/${machineId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2934,11 +2824,10 @@ function generateAnalisaReport() {
         console.error("Gagal menarik data report sensor:", err);
     });
 
-    // --- 2. UBAHAN BARU: Mengambil data histori Schedule & OEE dari InfluxDB ---
     fetch(`https://marvelous-undamaged-flagship.ngrok-free.dev/api/report-schedule/${machineId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ start: startIso, stop: endIso, interval: interval }) // Menggunakan logic start/stop yg sama
+        body: JSON.stringify({ start: startIso, stop: endIso, interval: interval }) 
     })
     .then(res => res.json())
     .then(data => {
@@ -2957,14 +2846,12 @@ function generateAnalisaReport() {
     });
 }
 
-// --- FUNGSI BARU: Render Tabel Histori Schedule Persis Seperti Menu Schedule Produksi ---
 function renderAnalisaScheduleTable(data) {
     let tbody = document.getElementById('db-analisa-schedule-body');
     if (!tbody) return;
     tbody.innerHTML = '';
     
     data.forEach(d => {
-        // Hilangkan % dan konversi untuk angka agar aman saat dirender
         let pDtMtc = typeof d.pDtMtc === 'string' ? d.pDtMtc : parseFloat(d.pDtMtc).toFixed(2) + '%';
         let pDtAll = typeof d.pDtAll === 'string' ? d.pDtAll : parseFloat(d.pDtAll).toFixed(2) + '%';
         let availMachine = typeof d.availMachine === 'string' ? d.availMachine : parseFloat(d.availMachine).toFixed(2) + '%';
@@ -2978,7 +2865,6 @@ function renderAnalisaScheduleTable(data) {
             <span style="letter-spacing: 0.5px;">${d.costListrik !== undefined ? formatRupiah(d.costListrik) : 'Rp 0'}</span>
         </div>`;
 
-        // Baris dirender tanpa input (hanya Read-Only)
         tbody.innerHTML += `
             <tr>   
                 <td><strong>${d.bulan || '-'}</strong></td>
@@ -3012,7 +2898,6 @@ function renderAnalisaScheduleTable(data) {
     });
 }
 
-// --- FUNGSI BARU: Update Grafik OEE Berdasarkan Data Histori ---
 function updateAnalisaOeeChart(data) {
     if(!analisaOeeChartInstance) return;
     
@@ -3021,7 +2906,6 @@ function updateAnalisaOeeChart(data) {
     let perfData = [];
     let oeeData = [];
 
-    // Jika yang di-request adalah ALL mesin, kita kelompokkan rata-ratanya berdasarkan nama mesin
     let machineId = document.getElementById('analisaMachineSelect').value;
     
     if (machineId === "ALL") {
@@ -3044,9 +2928,8 @@ function updateAnalisaOeeChart(data) {
             oeeData.push((grouped[mac].oeeSum / count).toFixed(2));
         }
     } else {
-        // Jika 1 mesin, sumbu X adalah Tanggal dan Shift
         data.forEach(d => {
-            let tglFormat = d.tglFull ? d.tglFull.slice(5) : ''; // Ambil MM-DD saja biar gak panjang
+            let tglFormat = d.tglFull ? d.tglFull.slice(5) : ''; 
             labels.push(`${tglFormat} (${d.shift})`);
             availData.push(parseFloat(d.availMachine) || 0);
             perfData.push(parseFloat(d.perf) || 0);
@@ -3066,7 +2949,6 @@ function downloadAnalisaChart(chartId, title) {
     if(!canvas) return;
     let link = document.createElement('a');
     
-    // Memberikan background putih pada saat render ke JPG agar tidak hitam transparan
     let ctx = canvas.getContext('2d');
     ctx.globalCompositeOperation = 'destination-over';
     ctx.fillStyle = "white";
@@ -3076,7 +2958,6 @@ function downloadAnalisaChart(chartId, title) {
     link.download = `Grafik_${title}_${document.getElementById('analisaMachineSelect').value}.jpg`;
     link.click();
     
-    // Reset composite operation
     ctx.globalCompositeOperation = 'source-over';
 }
 
@@ -3108,7 +2989,6 @@ function downloadAnalisaCSV(type) {
     document.body.removeChild(link);
 }
 
-// --- FUNGSI BARU: Download CSV Khusus Histori Schedule dari halaman Analisa ---
 function downloadAnalisaScheduleCSV() {
     if (analisaScheduleHistoryData.length === 0) {
         alert("Tidak ada data histori jadwal untuk diunduh. Silakan generate laporan terlebih dahulu!");
@@ -3117,7 +2997,6 @@ function downloadAnalisaScheduleCSV() {
 
     let csvContent = "data:text/csv;charset=utf-8,";
     
-    // Header
     let headers = [
         "Bulan", "Tanggal", "Shift", "Working Time (Menit)", "Nama Mesin", 
         "Nama Produk", "Lebar Jumbo", "Target 100% (CRT)", "Target 70% (CRT)", 
@@ -3128,7 +3007,6 @@ function downloadAnalisaScheduleCSV() {
     ];
     csvContent += headers.join(",") + "\r\n";
 
-    // Data Baris
     analisaScheduleHistoryData.forEach(d => {
         let row = [
             `"${d.bulan || '-'}"`, `"${d.tglFull || d.tgl || '-'}"`, `"${d.shift || '-'}"`, `"${d.wt}"`, `"${d.mesin}"`, 
@@ -3178,13 +3056,8 @@ window.onload = () => {
     // Panggil fungsi fetch data dari Firebase
     fetchSchedulesFromFirebase();
 
-    // -------------------------------------------------------------
-    // JALANKAN EVENT LISTENER PIPELINE (ONVALUE VIA REST SSE MURNI)
-    // -------------------------------------------------------------
-    setupRealtimeListeners();
-
     setInterval(updateRealtimeClock, 1000);
-    // pollRealtimeData kini HANYA bertugas sebagai prosesor matematika offline (tidak mendownload ulang)
+    // pollRealtimeData kini bertugas sebagai prosesor matematika offline dan polling normal
     setInterval(pollRealtimeData, 1000); 
     
     // MENGHIDUPKAN KEMBALI INTERVAL LIVE UPDATE UNTUK HALAMAN TAMPILAN
@@ -3193,7 +3066,7 @@ window.onload = () => {
 
 // --- UBAHAN PERBAIKAN TERAKHIR: BATCH UPDATE KE FIREBASE SETIAP 5 DETIK UNTUK MENCEGAH SPAM DAN DROP DATA ---
 setInterval(() => {
-    if (isResettingSchedule) return;
+    if (isResettingSchedule || isShiftTransition) return;
     
     // 2. Sinkronisasi Kalkulasi OEE, Downtime, Cost Listrik & KWH ke Schedule Produksi
     let localTglIso = getFactoryDateIso();
