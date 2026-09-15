@@ -8,11 +8,18 @@ const tarifKwh = 1500;
 const tarifListrikPerDetik = tarifKwh / 3600; // Rp 0.4166666... per detik
 // ---------------------------
 
+// --- FUNGSI STANDARISASI WAKTU WIB MURNI ---
+function getWIBTime() {
+    let d = new Date();
+    let utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+    return new Date(utc + (3600000 * 7)); // Paksa ke zona waktu WIB (UTC+7) tanpa peduli settingan PC
+}
+
 // --- FUNGSI MUTLAK: TANGGAL PABRIK (FACTORY DATE) ---
 // Memastikan Shift 3 (23:00 - 07:00) yang melewati tengah malam
 // TETAP dihitung sebagai jadwal produksi hari sebelumnya!
 function getFactoryDateIso(dateObj) {
-    let d = dateObj ? new Date(dateObj) : new Date();
+    let d = dateObj ? new Date(dateObj) : getWIBTime();
     let hour = d.getHours();
     let dateToUse = new Date(d.getTime());
     
@@ -30,8 +37,8 @@ function getFactoryDateIso(dateObj) {
 
 // FUNGSI JAM REALTIME WIB
 function updateRealtimeClock() {
-    let now = new Date();
-    let options = { timeZone: 'Asia/Jakarta', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' };
+    let now = getWIBTime();
+    let options = { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' };
     let timeString = now.toLocaleTimeString('id-ID', options) + " WIB";
     let clockEl = document.getElementById('realtime-clock');
     if(clockEl) clockEl.innerHTML = `<i class="fa-regular fa-clock"></i> ` + timeString;
@@ -89,6 +96,7 @@ let currentHourSpeedCount = 0;
 // --- VARIABEL GLOBAL UNTUK SINKRONISASI AKTUAL OUTPUT ---
 let lastTimbanganCount = {};
 let isFirstTimbanganFetch = {};
+let currentTimbanganCounts = {}; 
 // --------------------------------------------------------
 
 // Array Global Untuk Menampung Semua Riwayat Breakdown
@@ -532,7 +540,7 @@ function getRandom(min, max) { return parseFloat((Math.random() * (max - min) + 
 function liveUpdateDashboard() {
     if(document.getElementById('page-tampilan').classList.contains('active') === false) return;
 
-    let now = new Date();
+    let now = getWIBTime();
     let timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0') + ':' + now.getSeconds().toString().padStart(2, '0');
 
     if(currentMachine) {
@@ -696,46 +704,54 @@ function setupRealtimeListeners() {
         }
     });
 
-    // 4. Pipa Stream Timbangan (CUMA 1 KONEKSI UNTUK SEMUA MESIN, BUKAN 6 LAGI!)
+    // 4. Pipa Stream Timbangan MURNI ABSOLUT SYNC (CUMA 1 KONEKSI UNTUK SEMUA MESIN)
     onValueREST("timbangan", (data) => {
-        if (!data) return;
+        if (isResettingSchedule) return;
+
+        let timbanganData = data || {};
         
         rawMachineList.forEach(mac => {
-            let macData = data[mac.toUpperCase()];
+            let macData = timbanganData[mac.toUpperCase()];
             let totalDataFirebase = macData ? Object.keys(macData).length : 0;
             
-            if (isFirstTimbanganFetch[mac]) {
-                lastTimbanganCount[mac] = totalDataFirebase;
-                isFirstTimbanganFetch[mac] = false;
-            } else {
-                let diff = totalDataFirebase - lastTimbanganCount[mac];
+            let exactTglIso = getFactoryDateIso();
+            let exactShift = getCurrentShiftInfo();
+            
+            let validSchedules = scheduleDataList.filter(s => {
+                return s.mesin === mac && s.shift === exactShift && s.tglFull === exactTglIso;
+            });
+            
+            if (validSchedules.length > 0) {
+                let mData = machineData[mac];
+                let runningProduct = mData ? mData.currentProduct.trim() : "";
                 
-                // --- LOGIKA DELTA TRACKING TETAP SAMA PERSIS ---
-                if (diff > 0) {
-                    let exactTglIso = getFactoryDateIso();
-                    let exactShift = getCurrentShiftInfo();
-                    let validSchedules = scheduleDataList.filter(s => {
-                        return s.mesin === mac && s.shift === exactShift && s.tglFull === exactTglIso;
-                    });
+                let targetSched = validSchedules.find(s => s.produk.trim() === runningProduct);
+                if (!targetSched) {
+                    targetSched = validSchedules[validSchedules.length - 1]; 
+                }
+
+                // KUNCI PERBAIKAN: TINGGAL NYAMAIN DATA DARI FIREBASE SECARA MUTLAK
+                // Tidak lagi pakai logika math penambahan.
+                if (targetSched.actual !== totalDataFirebase) {
+                    targetSched.actual = totalDataFirebase;
                     
-                    if (validSchedules.length > 0) {
-                        let targetSched = validSchedules[validSchedules.length - 1];
-                        targetSched.actual = (parseFloat(targetSched.actual) || 0) + diff;
-                        
-                        if (targetSched.firebaseKey && !isResettingSchedule) {
-                            fetch(`https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/schedules/${targetSched.firebaseKey}.json`, {
-                                method: 'PATCH',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ actual: targetSched.actual })
-                            }).catch(e => {});
-                        }
+                    if (targetSched.firebaseKey) {
+                        fetch(`https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/schedules/${targetSched.firebaseKey}.json`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ actual: targetSched.actual })
+                        }).catch(e => console.error(e));
+                    }
+                    
+                    // Segarkan tampilan secara instan jika ada update
+                    if(document.getElementById('page-schedule-maintenance').classList.contains('active')) {
+                        renderQualityTable();
+                    }
+                    if(document.getElementById('page-tampilan').classList.contains('active')) {
+                        updateTampilanUI();
                     }
                 }
-                lastTimbanganCount[mac] = totalDataFirebase;
             }
-            
-            if (!realtimeDBData[mac]) realtimeDBData[mac] = {};
-            realtimeDBData[mac].lastUpdate = Date.now();
         });
     });
 }
@@ -933,7 +949,7 @@ if (typeof powerData === 'undefined') { window.powerData = {"MAIN_FACTORY": 1200
 if (typeof unitList === 'undefined') { window.unitList = ["Motor Unwinder", "Cylinder Emboss", "Folding Blade", "Logsaw Blade Belt", "Pneumatic Valve"]; }
 
 function getCurrentShiftInfo(dateObj) {
-    let d = dateObj ? new Date(dateObj) : new Date();
+    let d = dateObj ? new Date(dateObj) : getWIBTime();
     let hour = d.getHours();
     if (hour >= 7 && hour < 15) return "Shift 1";
     if (hour >= 15 && hour < 23) return "Shift 2";
@@ -1798,7 +1814,7 @@ setInterval(() => {
             if (mData && mData.breakdown.isActive) {
                 let elapsedSec = mData.breakdown.lockedElapsedSec !== null 
                     ? mData.breakdown.lockedElapsedSec 
-                    : Math.floor((new Date() - mData.breakdown.startTime) / 1000);
+                    : Math.floor((Date.now() - mData.breakdown.startTime.getTime()) / 1000);
                 
                 console.log(`[SHIFT SPLIT] Memotong waktu downtime mesin ${id} untuk shift lama...`);
                 // Paksa simpan sebagai production di shift lama (otomatis masuk ke jadwal Shift tsb)
@@ -1845,10 +1861,6 @@ setInterval(() => {
                 machineData[id].kwhShift = 0;
                 machineData[id].costShift = 0;
                 
-                // Reset cache memori agar siap menerima perhitungan delta di shift baru
-                lastTimbanganCount[id] = 0;
-                isFirstTimbanganFetch[id] = true; 
-
                 machineData[id].breakdown.accumulated = { production: 0, maintenance: 0, ppic: 0 };
                 
                 let schedForShift = scheduleDataList.find(s => s.mesin === id && s.tglFull === currentTglIso && s.shift === currentActiveShift);
@@ -2510,12 +2522,8 @@ function calculateAndAddSchedule() {
         let existingCount = scheduleDataList.filter(s => s.tglFull === iterTglVal && s.shift === finalShiftVal && s.mesin === mesin).length;
         let isFirst = (existingCount === 0);
 
-        // --- FITUR BARU: MENGAMBIL DATA AKTUAL JIKA JADWAL DIBUAT TERLAMBAT ---
+        // --- MENGAMBIL DATA AKTUAL JIKA JADWAL DIBUAT TERLAMBAT (Diambil otomatis oleh pipeline Firebase real-time) ---
         let initialActual = 0;
-        let isToday = (iterTglVal === getFactoryDateIso());
-        if (isFirst && isToday) {
-            initialActual = lastTimbanganCount[mesin] || 0;
-        }
 
         let newEntry = {
             idJadwal: Date.now() + i, // Ditambah variabel iterasi agar ID nya tetap unik meskipun dieksekusi super cepat
@@ -2532,7 +2540,7 @@ function calculateAndAddSchedule() {
             speed: idealSpeed.toFixed(3),
             isFirst: isFirst,
             
-            actual: initialActual, // MENGGUNAKAN NILAI INITIAL ACTUAL
+            actual: initialActual, 
             dtProd: 0,
             dtMtc: 0,
             dtPpic: 0,
