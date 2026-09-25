@@ -49,7 +49,7 @@ function syncToGoogleSheets(actionName, dataObj) {
     const scriptURL = 'https://script.google.com/macros/s/AKfycbxEX_TzUJ1Qwbw-a9VgM95LJUrRlAqaKuVmkg4Qlwj8wqfoLBdS04J7KjDEh_LO5J3-/exec'; 
     
     const firebaseFolder = actionName === 'addLogbook' ? 'logbook_technician' : 'shift_handover';
-    const firebaseUrl = `https://cmms-e41d0-default-rtdb.asia-southeast1.firebasedatabase.app/${firebaseFolder}.json`;
+    const firebaseUrl = `https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/${firebaseFolder}.json`;
 
     fetch(firebaseUrl, {
         method: 'POST',
@@ -101,7 +101,7 @@ let allBreakdownEvents = [];
 // Kita ambil dari Firebase agar rata-rata per jam tidak hilang saat di-refresh
 function fetchHistoryFromLocal(machineId) {
     let tglIso = getFactoryDateIso();
-    fetch(`https://cmms-e41d0-default-rtdb.asia-southeast1.firebasedatabase.app/HOURLY_SPEED_CHART/${machineId}/${tglIso}.json`)
+    fetch(`https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/HOURLY_SPEED_CHART/${machineId}/${tglIso}.json`)
     .then(res => res.json())
     .then(data => {
         if(data) {
@@ -219,7 +219,7 @@ let pendingAutoBd = { machineId: null, elapsedSec: 0 };
 
 // Fetch Schedules & Breakdowns secara sinkron
 function fetchSchedulesFromFirebase() {
-    fetch('https://cmms-e41d0-default-rtdb.asia-southeast1.firebasedatabase.app/schedules.json')
+    fetch('https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/schedules.json')
     .then(res => res.json())
     .then(data => {
         if (data) {
@@ -243,7 +243,7 @@ function fetchSchedulesFromFirebase() {
 
             // Segera basmi data hantu dari Firebase secara otomatis
             ghostKeys.forEach(gKey => {
-                fetch(`https://cmms-e41d0-default-rtdb.asia-southeast1.firebasedatabase.app/schedules/${gKey}.json`, {
+                fetch(`https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/schedules/${gKey}.json`, {
                     method: 'DELETE'
                 }).catch(e => {});
             });
@@ -268,7 +268,7 @@ function fetchSchedulesFromFirebase() {
 }
 
 function fetchBreakdownStatesFromFirebase() {
-    fetch('https://cmms-e41d0-default-rtdb.asia-southeast1.firebasedatabase.app/breakdown_events.json')
+    fetch('https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/breakdown_events.json')
     .then(res => res.json())
     .then(data => {
         if (data) {
@@ -335,7 +335,7 @@ function fetchBreakdownStatesFromFirebase() {
 
 // Fungsi untuk mengambil state "Pilih Run" dari Firebase
 function fetchActiveRunsFromFirebase() {
-    fetch('https://cmms-e41d0-default-rtdb.asia-southeast1.firebasedatabase.app/active_runs.json')
+    fetch('https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/active_runs.json')
     .then(res => res.json())
     .then(data => {
         if (data) {
@@ -365,7 +365,7 @@ function fetchActiveRunsFromFirebase() {
 
 // --- FUNGSI PERBAIKAN: TARIK DAYA_AKUMULASI AGAR COST LISTRIK TIDAK HILANG SAAT REFRESH ---
 function fetchAccumulatedPowerFromFirebase() {
-    fetch('https://cmms-e41d0-default-rtdb.asia-southeast1.firebasedatabase.app/DAYA_AKUMULASI.json')
+    fetch('https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/DAYA_AKUMULASI.json')
     .then(res => res.json())
     .then(data => {
         if(data) {
@@ -593,7 +593,7 @@ function liveUpdateDashboard() {
             // SIMPAN RATA-RATA KE FIREBASE (AGAR TIDAK HILANG SAAT REFRESH)
             let tglIso = getFactoryDateIso();
             let avgToSave = tampilanSpeedData[tampilanSpeedData.length - 1];
-            fetch(`https://cmms-e41d0-default-rtdb.asia-southeast1.firebasedatabase.app/HOURLY_SPEED_CHART/${currentMachine}/${tglIso}/${hourStr}.json`, {
+            fetch(`https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/HOURLY_SPEED_CHART/${currentMachine}/${tglIso}/${hourStr}.json`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(avgToSave)
@@ -632,7 +632,7 @@ function pollRealtimeData() {
     }
 
     // 1. Fetch Speed untuk Auto-Breakdown & Dashboard
-    fetch('https://cmms-e41d0-default-rtdb.asia-southeast1.firebasedatabase.app/speed_mesin.json')
+    fetch('https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/speed_mesin.json')
       .then(res => res.json())
       .then(data => {
           if (!data) return;
@@ -666,7 +666,7 @@ function pollRealtimeData() {
     let curShift = getCurrentShiftInfo();
 
     rawMachineList.forEach(mac => {
-        fetch(`https://cmms-e41d0-default-rtdb.asia-southeast1.firebasedatabase.app/timbangan/${mac.toUpperCase()}.json`)
+        fetch(`https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/timbangan/${mac.toUpperCase()}.json`)
         .then(res => res.json())
         .then(data => {
             // --- PERBAIKAN MUTLAK: Filter Berdasarkan Validasi Sederhana Tanggal & Shift (Self-Cleaning) ---
@@ -704,7 +704,7 @@ function pollRealtimeData() {
             // Sapu bersih data shift lama yang nyangkut (Self-Cleaning Latar Belakang)
             if (keysToDelete.length > 0) {
                 keysToDelete.forEach(k => {
-                    fetch(`https://cmms-e41d0-default-rtdb.asia-southeast1.firebasedatabase.app/timbangan/${mac.toUpperCase()}/${k}.json`, {
+                    fetch(`https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/timbangan/${mac.toUpperCase()}/${k}.json`, {
                         method: 'DELETE'
                     }).catch(e => {});
                 });
@@ -731,7 +731,7 @@ function pollRealtimeData() {
                     targetSched.actual = totalDataFirebase;
 
                     if (targetSched.firebaseKey && !isResettingSchedule) {
-                        fetch(`https://cmms-e41d0-default-rtdb.asia-southeast1.firebasedatabase.app/schedules/${targetSched.firebaseKey}.json`, {
+                        fetch(`https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/schedules/${targetSched.firebaseKey}.json`, {
                             method: 'PATCH',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ actual: targetSched.actual })
@@ -749,7 +749,7 @@ function pollRealtimeData() {
     });
 
     // 3. Fetch Realtime DAYA Listrik
-    fetch('https://cmms-e41d0-default-rtdb.asia-southeast1.firebasedatabase.app/DAYA.json')
+    fetch('https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/DAYA.json')
     .then(res => res.json())
     .then(dayaData => {
         if(!dayaData) return;
@@ -789,7 +789,7 @@ function pollRealtimeData() {
     }).catch(e => {});
     
     // 4. SINKRONISASI MODAL DOWNTIME LINTAS HP
-    fetch('https://cmms-e41d0-default-rtdb.asia-southeast1.firebasedatabase.app/bd_resolved_flag.json')
+    fetch('https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/bd_resolved_flag.json')
     .then(res => res.json())
     .then(flags => {
         if(!flags) return;
@@ -859,7 +859,7 @@ function processAutoBreakdown() {
                     state.startTime = mData.breakdown.startTime;
 
                     // [POST EVENT] Start Breakdown agar tercatat ke Firebase
-                    fetch('https://cmms-e41d0-default-rtdb.asia-southeast1.firebasedatabase.app/breakdown_events.json', {
+                    fetch('https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/breakdown_events.json', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -903,7 +903,7 @@ function saveAutoBreakdown(finalCategory, forceMacId = null, forceSec = null) {
     if (!mData || !mData.breakdown.startTime) return;
 
     // --- SINKRONISASI BENDERA: Kasih tau HP lain kalau mesin ini sudah kita tangani! ---
-    fetch(`https://cmms-e41d0-default-rtdb.asia-southeast1.firebasedatabase.app/bd_resolved_flag/${macId}.json`, {
+    fetch(`https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/bd_resolved_flag/${macId}.json`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ category: finalCategory, timestamp: Date.now() })
@@ -951,7 +951,7 @@ function saveAutoBreakdown(finalCategory, forceMacId = null, forceSec = null) {
     allBreakdownEvents.push(newEvent);
 
     // Simpan log Breakdown ke Firebase (MENJAMIN DATA TIDAK AKAN HILANG)
-    fetch('https://cmms-e41d0-default-rtdb.asia-southeast1.firebasedatabase.app/breakdown_events.json', {
+    fetch('https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/breakdown_events.json', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newEvent)
@@ -1984,7 +1984,7 @@ function setRunningProduct(index) {
 
     mData.currentProduct = dataJadwal.produk.trim();
 
-    fetch(`https://cmms-e41d0-default-rtdb.asia-southeast1.firebasedatabase.app/active_runs/${dataJadwal.mesin}.json`, {
+    fetch(`https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/active_runs/${dataJadwal.mesin}.json`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -2035,7 +2035,7 @@ setInterval(() => {
                     mData.breakdown.lockedElapsedSec = null;
                     
                     // Push event ke firebase
-                    fetch('https://cmms-e41d0-default-rtdb.asia-southeast1.firebasedatabase.app/breakdown_events.json', {
+                    fetch('https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/breakdown_events.json', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -2054,7 +2054,7 @@ setInterval(() => {
         
         // --- UBAHAN BARU: HAPUS SEMUA DATA TIMBANGAN SAAT GANTI SHIFT ---
         rawMachineList.forEach(id => {
-            fetch(`https://cmms-e41d0-default-rtdb.asia-southeast1.firebasedatabase.app/timbangan/${id.toUpperCase()}.json`, {
+            fetch(`https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/timbangan/${id.toUpperCase()}.json`, {
                 method: 'DELETE'
             }).then(() => console.log(`[SHIFT CHANGE] Data timbangan mesin ${id} dibersihkan otomatis.`))
               .catch(e => console.error(e));
@@ -2343,7 +2343,7 @@ function lanjutkanExportDanClear(pastSchedules, activeSchedules) {
 
     let deletePromises = pastSchedules.map(s => {
         if (s.firebaseKey) {
-            return fetch(`https://cmms-e41d0-default-rtdb.asia-southeast1.firebasedatabase.app/schedules/${s.firebaseKey}.json`, {
+            return fetch(`https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/schedules/${s.firebaseKey}.json`, {
                 method: 'DELETE'
             });
         }
@@ -2482,7 +2482,7 @@ function saveProductionUpdate() {
 
     machineData[machineId].currentProduct = selectedProduct;
 
-    fetch(`https://cmms-e41d0-default-rtdb.asia-southeast1.firebasedatabase.app/active_runs/${machineId}.json`, {
+    fetch(`https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/active_runs/${machineId}.json`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -2907,7 +2907,7 @@ function calculateAndAddSchedule() {
         scheduleDataList.push(newEntry);
         addedCount++;
         
-        fetch('https://cmms-e41d0-default-rtdb.asia-southeast1.firebasedatabase.app/schedules.json', {
+        fetch('https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/schedules.json', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newEntry)
@@ -2996,7 +2996,7 @@ function updateScheduleInline(index, field, value) {
     if (field === 'produk' && isCurrentlyRunning) {
         mData.currentProduct = value.trim();
         
-        fetch(`https://cmms-e41d0-default-rtdb.asia-southeast1.firebasedatabase.app/active_runs/${mac}.json`, {
+        fetch(`https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/active_runs/${mac}.json`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -3009,7 +3009,7 @@ function updateScheduleInline(index, field, value) {
 
     if (sched.firebaseKey && !isResettingSchedule) {
         // PATCH SEMUA FIELD YANG BERUBAH SEKALIGUS
-        fetch(`https://cmms-e41d0-default-rtdb.asia-southeast1.firebasedatabase.app/schedules/${sched.firebaseKey}.json`, {
+        fetch(`https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/schedules/${sched.firebaseKey}.json`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -3572,7 +3572,7 @@ setInterval(() => {
     });
 
     if (Object.keys(schedPayload).length > 0) {
-        fetch('https://cmms-e41d0-default-rtdb.asia-southeast1.firebasedatabase.app/schedules.json', {
+        fetch('https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/schedules.json', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(schedPayload)
@@ -3587,7 +3587,7 @@ setInterval(() => {
         if(mData && (mData.kwhShift > 0 || mData.costShift > 0)) {
             dayaPayload[macId] = {
                 kwh: mData.kwhShift,
-                costListrik: mData.costShift,
+                costListrik: mData.costShift,   
                 tglFull: localTglIso,
                 shift: localCurShift
             };
@@ -3595,7 +3595,7 @@ setInterval(() => {
     });
 
     if(Object.keys(dayaPayload).length > 0) {
-        fetch('https://cmms-e41d0-default-rtdb.asia-southeast1.firebasedatabase.app/DAYA_AKUMULASI.json', {
+        fetch('https://cmms-d11b3-default-rtdb.asia-southeast1.firebasedatabase.app/DAYA_AKUMULASI.json', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dayaPayload)
