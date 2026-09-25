@@ -1,0 +1,3395 @@
+const dataProduksi = [
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "M-FOLD ROYALTY PREMIER RE-MFT-K R-1",
+        "LEBAR JUMBO (CM)": 120
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NP VICTORIA BAY VB2PINW FSC",
+        "LEBAR JUMBO (CM)": 112
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN TRUVAI SUPPLY XN222",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "SINGLEFOLD TW BROWN ROYALTY RE-SFT-K R-3",
+        "LEBAR JUMBO (CM)": 117
+    },
+    {
+        "NAMA PRODUK": "M-FOLD TOWEL BROWN BELFAIR 54002",
+        "LEBAR JUMBO (CM)": 169
+    },
+    {
+        "NAMA PRODUK": "NP DINNER KITCHEN ESSENTIALS 117189",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "NP COCKTAIL KRAFT GMP PRINTED EJH R-1",
+        "LEBAR JUMBO (CM)": 48
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL R-2",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "SOFTPACK COMET BEAUTY TISSUE REFILL PACK",
+        "LEBAR JUMBO (CM)": 129
+    },
+    {
+        "NAMA PRODUK": "HRT TRUVAI SUPPLY HT112 KRAFT",
+        "LEBAR JUMBO (CM)": 165
+    },
+    {
+        "NAMA PRODUK": "HRT EN-MOTION 143M COC FSC",
+        "LEBAR JUMBO (CM)": 156
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "JRT LIFEGUARD 4610 DURASAFE R2",
+        "LEBAR JUMBO (CM)": 265
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL RIGHT CHOICE BUNZL 78000417",
+        "LEBAR JUMBO (CM)": 255
+    },
+    {
+        "NAMA PRODUK": "JRT MULTIPLY 18 GSM 130M VP FSC R-4",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "JUMBO PACK SIERRA 600S",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL SLIMFOLD ENTICE R2-460 COC FSC",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL SLIMFOLD ENTICE R3-460 COC FSC",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NP VICTORIA BAY VB2PINW FSC",
+        "LEBAR JUMBO (CM)": 112
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN TRUVAI SUPPLY XN222",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "SINGLEFOLD TW BROWN ROYALTY RE-SFT-K R-3",
+        "LEBAR JUMBO (CM)": 117
+    },
+    {
+        "NAMA PRODUK": "M-FOLD TOWEL BROWN BELFAIR 54002",
+        "LEBAR JUMBO (CM)": 169
+    },
+    {
+        "NAMA PRODUK": "NP DINNER KITCHEN ESSENTIALS 117189",
+        "LEBAR JUMBO (CM)": 36
+    },
+    {
+        "NAMA PRODUK": "NAPKIN COCKTAIL TRUVAI SUPPLY BN241",
+        "LEBAR JUMBO (CM)": 23
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "LUNCH NAPKIN ABALINE PAM-09352",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NP COCKTAIL KRAFT GMP PRINTED EJH R-1",
+        "LEBAR JUMBO (CM)": 48
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL R-2",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "SOFTPACK COMET BEAUTY TISSUE REFILL PACK",
+        "LEBAR JUMBO (CM)": 129
+    },
+    {
+        "NAMA PRODUK": "HRT TRUVAI SUPPLY HT112 KRAFT",
+        "LEBAR JUMBO (CM)": 165
+    },
+    {
+        "NAMA PRODUK": "HRT FINESSE ROLL TOWELS NO PERFORATED 16X80M (R-1680)",
+        "LEBAR JUMBO (CM)": 169
+    },
+    {
+        "NAMA PRODUK": "HRT EN-MOTION 143M COC FSC",
+        "LEBAR JUMBO (CM)": 156
+    },
+    {
+        "NAMA PRODUK": "HRT ROYALTY PREMIER RE-HWT800K 244 M",
+        "LEBAR JUMBO (CM)": 165
+    },
+    {
+        "NAMA PRODUK": "JRT LIFEGUARD 4610 DURASAFE R2",
+        "LEBAR JUMBO (CM)": 265
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL RIGHT CHOICE BUNZL 78000417",
+        "LEBAR JUMBO (CM)": 255
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON VT1106 TW 34 GSM R-1",
+        "LEBAR JUMBO (CM)": 119.5
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL SLIMFOLD ENTICE R3-460 COC FSC",
+        "LEBAR JUMBO (CM)": 94
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NP VICTORIA BAY VB2PINW FSC",
+        "LEBAR JUMBO (CM)": 112
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN TRUVAI SUPPLY XN222",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "SINGLEFOLD TW BROWN ROYALTY RE-SFT-K R-3",
+        "LEBAR JUMBO (CM)": 117
+    },
+    {
+        "NAMA PRODUK": "M-FOLD TOWEL BROWN BELFAIR 54002",
+        "LEBAR JUMBO (CM)": 169
+    },
+    {
+        "NAMA PRODUK": "NP DINNER KITCHEN ESSENTIALS 117189",
+        "LEBAR JUMBO (CM)": 36
+    },
+    {
+        "NAMA PRODUK": "NAPKIN COCKTAIL TRUVAI SUPPLY BN241",
+        "LEBAR JUMBO (CM)": 23
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "NP COCKTAIL KRAFT GMP PRINTED EJH R-1",
+        "LEBAR JUMBO (CM)": 48
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL R-2",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "SOFTPACK COMET BEAUTY TISSUE REFILL PACK",
+        "LEBAR JUMBO (CM)": 129
+    },
+    {
+        "NAMA PRODUK": "HRT FINESSE ROLL TOWELS NO PERFORATED 16X80M (R-1680)",
+        "LEBAR JUMBO (CM)": 169
+    },
+    {
+        "NAMA PRODUK": "HRT ROYALTY PREMIER RE-HWT800K 244 M",
+        "LEBAR JUMBO (CM)": 165
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "JRT LIFEGUARD 4610 DURASAFE R2",
+        "LEBAR JUMBO (CM)": 265
+    },
+    {
+        "NAMA PRODUK": "JRT ELEGANCE PAPER JT-1000 R-1",
+        "LEBAR JUMBO (CM)": 267
+    },
+    {
+        "NAMA PRODUK": "JUMBO PACK SIERRA 600S",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON VT1106 TW 34 GSM R-1",
+        "LEBAR JUMBO (CM)": 119.5
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL SLIMFOLD ENTICE R3-460 COC FSC",
+        "LEBAR JUMBO (CM)": 94
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NP VICTORIA BAY VB2PINW FSC",
+        "LEBAR JUMBO (CM)": 112
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN TRUVAI SUPPLY XN222",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "SINGLEFOLD TW BROWN ROYALTY RE-SFT-K R-3",
+        "LEBAR JUMBO (CM)": 117
+    },
+    {
+        "NAMA PRODUK": "M-FOLD TOWEL BROWN BELFAIR 54002",
+        "LEBAR JUMBO (CM)": 169
+    },
+    {
+        "NAMA PRODUK": "NP DINNER KITCHEN ESSENTIALS 117189",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NAPKIN COCKTAIL TRUVAI SUPPLY BN241",
+        "LEBAR JUMBO (CM)": 23
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "NP COCKTAIL KRAFT GMP PRINTED EJH R-1",
+        "LEBAR JUMBO (CM)": 48
+    },
+    {
+        "NAMA PRODUK": "JUMBO PACK MONTISS 1000S R2",
+        "LEBAR JUMBO (CM)": 140
+    },
+    {
+        "NAMA PRODUK": "JUMBO PACK MONTISS 1000S R2",
+        "LEBAR JUMBO (CM)": 140
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL R-2",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "SOFTPACK COMET BEAUTY TISSUE REFILL PACK",
+        "LEBAR JUMBO (CM)": 129.5
+    },
+    {
+        "NAMA PRODUK": "HRT FINESSE ROLL TOWELS NO PERFORATED 16X80M (R-1680)",
+        "LEBAR JUMBO (CM)": 169
+    },
+    {
+        "NAMA PRODUK": "HRT ROYALTY PREMIER RE-HWT800K 244 M",
+        "LEBAR JUMBO (CM)": 165
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "JRT ELEGANCE PAPER JT-1000 R2",
+        "LEBAR JUMBO (CM)": 265
+    },
+    {
+        "NAMA PRODUK": "JRT MEDLINE NON26805",
+        "LEBAR JUMBO (CM)": 276
+    },
+    {
+        "NAMA PRODUK": "JRT ELEGANCE PAPER JT-1000 R2",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX ROYALTY PREMIER 100S 19X19CM",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON VT1106 TW 34 GSM R-1",
+        "LEBAR JUMBO (CM)": 119.5
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL SLIMFOLD ENTICE R3-460 COC FSC",
+        "LEBAR JUMBO (CM)": 94
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NP VICTORIA BAY VB2PINW FSC",
+        "LEBAR JUMBO (CM)": 112
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL ROYALTY EARTH 250S RE-XPNK R-1",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "SINGLEFOLD TW BROWN ROYALTY RE-SFT-K R-3",
+        "LEBAR JUMBO (CM)": 117
+    },
+    {
+        "NAMA PRODUK": "M-FOLD TOWEL BROWN BELFAIR 54002",
+        "LEBAR JUMBO (CM)": 169
+    },
+    {
+        "NAMA PRODUK": "NP DINNER KITCHEN ESSENTIALS 117189",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NAPKIN COCKTAIL TRUVAI SUPPLY BN241",
+        "LEBAR JUMBO (CM)": 23
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "NP COCKTAIL KRAFT GMP PRINTED EJH R-1",
+        "LEBAR JUMBO (CM)": 48
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL R-2",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "SOFTPACK COMET BEAUTY TISSUE REFILL PACK",
+        "LEBAR JUMBO (CM)": 129.5
+    },
+    {
+        "NAMA PRODUK": "HRT FINESSE TOWELS PERFORATED R-1680P",
+        "LEBAR JUMBO (CM)": 169
+    },
+    {
+        "NAMA PRODUK": "HRT ROYALTY PREMIER RE-HWT800K 244 M",
+        "LEBAR JUMBO (CM)": 165
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL SILKY SOFT CPTW6600",
+        "LEBAR JUMBO (CM)": 165
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "JRT ELEGANCE PAPER JT-1000 R2",
+        "LEBAR JUMBO (CM)": 265
+    },
+    {
+        "NAMA PRODUK": "JRT MEDLINE NON26805",
+        "LEBAR JUMBO (CM)": 276
+    },
+    {
+        "NAMA PRODUK": "JRT ELEGANCE PAPER JT-1000 R2",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON VT1106 TW 34 GSM R-1",
+        "LEBAR JUMBO (CM)": 119.5
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL SLIMFOLD ENTICE R3-460 COC FSC",
+        "LEBAR JUMBO (CM)": 94
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NP VICTORIA BAY VB2PINW FSC",
+        "LEBAR JUMBO (CM)": 112
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL ROYALTY EARTH 250S RE-XPNK R-1",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "SINGLEFOLD TW BROWN ROYALTY RE-SFT-K R-3",
+        "LEBAR JUMBO (CM)": 117
+    },
+    {
+        "NAMA PRODUK": "M-FOLD TOWEL BROWN BELFAIR 54002",
+        "LEBAR JUMBO (CM)": 169
+    },
+    {
+        "NAMA PRODUK": "NP DINNER KITCHEN ESSENTIALS 117189",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NAPKIN COCKTAIL TRUVAI SUPPLY BN241",
+        "LEBAR JUMBO (CM)": 23
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "NP COCKTAIL KRAFT GMP PRINTED EJH R-1",
+        "LEBAR JUMBO (CM)": 48
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL R-2",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "SOFTPACK COMET BEAUTY TISSUE REFILL PACK",
+        "LEBAR JUMBO (CM)": 129.5
+    },
+    {
+        "NAMA PRODUK": "HRT FINESSE TOWELS PERFORATED R-1680P",
+        "LEBAR JUMBO (CM)": 169
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL SILKY SOFT CPTW6600",
+        "LEBAR JUMBO (CM)": 165
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "JRT ELEGANCE PAPER JT-1000 R2",
+        "LEBAR JUMBO (CM)": 265
+    },
+    {
+        "NAMA PRODUK": "JRT MEDLINE NON26805",
+        "LEBAR JUMBO (CM)": 276
+    },
+    {
+        "NAMA PRODUK": "JRT ELEGANCE PAPER JT-1000 R2",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "JUMBO PACK SIERRA 600S",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON VT1106 TW 34 GSM R-1",
+        "LEBAR JUMBO (CM)": 119.5
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NP VICTORIA BAY VB2PINW FSC",
+        "LEBAR JUMBO (CM)": 112
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL ROYALTY EARTH 250'S RE-XPNK",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "SINGLEFOLD TW BROWN ROYALTY RE-SFT-K R-3",
+        "LEBAR JUMBO (CM)": 117
+    },
+    {
+        "NAMA PRODUK": "M-FOLD TOWEL BROWN BELFAIR 54002",
+        "LEBAR JUMBO (CM)": 169
+    },
+    {
+        "NAMA PRODUK": "NP DINNER KITCHEN ESSENTIALS 117189",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NP COCKTAIL DHG PROFESIONAL BN9X9 4000-2",
+        "LEBAR JUMBO (CM)": 46
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "NP COCKTAIL KRAFT GMP PRINTED EJH R-1",
+        "LEBAR JUMBO (CM)": 48
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL R-2",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "SOFTPACK COMET BEAUTY TISSUE REFILL PACK",
+        "LEBAR JUMBO (CM)": 129
+    },
+    {
+        "NAMA PRODUK": "HRT FINESSE TOWELS PERFORATED R-1680P",
+        "LEBAR JUMBO (CM)": 169
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL SILKY SOFT CPTW6600",
+        "LEBAR JUMBO (CM)": 165
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "JRT ELEGANCE PAPER JT-1000 R2",
+        "LEBAR JUMBO (CM)": 265
+    },
+    {
+        "NAMA PRODUK": "JRT LAFAYETTE ECO-JR300 REC-HW",
+        "LEBAR JUMBO (CM)": 268
+    },
+    {
+        "NAMA PRODUK": "JRT MEDLINE NON26805",
+        "LEBAR JUMBO (CM)": 276
+    },
+    {
+        "NAMA PRODUK": "JRT ELEGANCE PAPER JT-1000 R2",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON VT1106 TW 34 GSM R-1",
+        "LEBAR JUMBO (CM)": 119.5
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL SLIMFOLD ENTICE R3-460 COC FSC",
+        "LEBAR JUMBO (CM)": 94
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NP VICTORIA BAY VB2PINW FSC",
+        "LEBAR JUMBO (CM)": 112
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL ROYALTY EARTH 250'S RE-XPNK",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "SINGLEFOLD TW BROWN ROYALTY RE-SFT-K R-3",
+        "LEBAR JUMBO (CM)": 117
+    },
+    {
+        "NAMA PRODUK": "M-FOLD TOWEL BROWN BELFAIR 54002",
+        "LEBAR JUMBO (CM)": 169
+    },
+    {
+        "NAMA PRODUK": "NP DINNER KITCHEN ESSENTIALS 117189",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NP COCKTAIL DHG PROFESIONAL BN9X9 4000-2",
+        "LEBAR JUMBO (CM)": 46
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "LUNCH NAPKIN ABALINE PAM-09352",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NP COCKTAIL KRAFT GMP PRINTED EJH R-1",
+        "LEBAR JUMBO (CM)": 48
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL R-2",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE LUCKY SUPER 80S 11260-12",
+        "LEBAR JUMBO (CM)": 126
+    },
+    {
+        "NAMA PRODUK": "HRT FINESSE TOWELS PERFORATED R-1680P",
+        "LEBAR JUMBO (CM)": 169
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL SILKY SOFT CPTW6600",
+        "LEBAR JUMBO (CM)": 165
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "JRT LAFAYETTE ECO-JR300 REC-HW",
+        "LEBAR JUMBO (CM)": 268
+    },
+    {
+        "NAMA PRODUK": "JRT MEDLINE NON26805",
+        "LEBAR JUMBO (CM)": 276
+    },
+    {
+        "NAMA PRODUK": "JRT ELEGANCE PAPER JT-1000 R2",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "JUMBO PACK SIERRA 600S",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE LUCKY SUPER 80S 11260-12",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON VT1106 TW 34 GSM R-1",
+        "LEBAR JUMBO (CM)": 119.5
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL SLIMFOLD ENTICE R3-460 COC FSC",
+        "LEBAR JUMBO (CM)": 94
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NP VICTORIA BAY VB2PINW FSC",
+        "LEBAR JUMBO (CM)": 112
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL ROYALTY EARTH 250'S RE-XPNK",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "SINGLEFOLD TW BROWN ROYALTY RE-SFT-K R-3",
+        "LEBAR JUMBO (CM)": 117
+    },
+    {
+        "NAMA PRODUK": "M-FOLD TOWEL BROWN BELFAIR 54002",
+        "LEBAR JUMBO (CM)": 169
+    },
+    {
+        "NAMA PRODUK": "NP DINNER KITCHEN ESSENTIALS 117189",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NP COCKTAIL DHG PROFESIONAL BN9X9 4000-2",
+        "LEBAR JUMBO (CM)": 23
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 43
+    },
+    {
+        "NAMA PRODUK": "LUNCH NAPKIN ABALINE PAM-09352",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NP COCKTAIL KRAFT GMP PRINTED EJH R-1",
+        "LEBAR JUMBO (CM)": 48
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL R-2",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R3",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE LUCKY SUPER 80S 11260-12",
+        "LEBAR JUMBO (CM)": 126
+    },
+    {
+        "NAMA PRODUK": "HRT FINESSE TOWELS PERFORATED R-1680P",
+        "LEBAR JUMBO (CM)": 169
+    },
+    {
+        "NAMA PRODUK": "HRT ENTICE R2-080 COC FSC",
+        "LEBAR JUMBO (CM)": 169
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL SILKY SOFT CPTW6600",
+        "LEBAR JUMBO (CM)": 165
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "JRT LAFAYETTE ECO-JR300 REC-HW",
+        "LEBAR JUMBO (CM)": 268
+    },
+    {
+        "NAMA PRODUK": "JRT MEDLINE NON26805",
+        "LEBAR JUMBO (CM)": 276
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE LUCKY SUPER 80S 11260-12",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "JRT ELEGANCE PAPER JT-1000 R2",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON VT1106 TW 34 GSM R-1",
+        "LEBAR JUMBO (CM)": 119.5
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL SLIMFOLD ENTICE R3-460 COC FSC",
+        "LEBAR JUMBO (CM)": 94
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL M-FOLD BETHEL 250'S MFP-4000W",
+        "LEBAR JUMBO (CM)": 96
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NP VICTORIA BAY VB2PINW FSC",
+        "LEBAR JUMBO (CM)": 130
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL ROYALTY EARTH 250S RE-XPNK R-1",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "SINGLEFOLD TW BROWN ROYALTY RE-SFT-K R-3",
+        "LEBAR JUMBO (CM)": 117
+    },
+    {
+        "NAMA PRODUK": "M-FOLD TOWEL BROWN BELFAIR 54002",
+        "LEBAR JUMBO (CM)": 169
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH LW LNK500",
+        "LEBAR JUMBO (CM)": 60
+    },
+    {
+        "NAMA PRODUK": "NP DINNER KITCHEN ESSENTIALS 117189",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NP COCKTAIL DHG PROFESIONAL BN9X9 4000-2",
+        "LEBAR JUMBO (CM)": 23
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 43
+    },
+    {
+        "NAMA PRODUK": "LUNCH NAPKIN ABALINE PAM-09352",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R3",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE LUCKY SUPER 80S 11260-12",
+        "LEBAR JUMBO (CM)": 126
+    },
+    {
+        "NAMA PRODUK": "HRT ENTICE R2-080 COC FSC",
+        "LEBAR JUMBO (CM)": 169
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL SILKY SOFT CPTW6600",
+        "LEBAR JUMBO (CM)": 165
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "JRT MORCON VT1150 350M",
+        "LEBAR JUMBO (CM)": 268
+    },
+    {
+        "NAMA PRODUK": "JRT SMALLCORE MAXIMUS X910",
+        "LEBAR JUMBO (CM)": 279
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE LUCKY SUPER 80S 11260-12",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "JUMBO PACK SIERRA 600S",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "JRT ELEGANCE PAPER JT-1000 R2",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON VT1106 TW 34 GSM R-1",
+        "LEBAR JUMBO (CM)": 119.5
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL M-FOLD BETHEL 250'S MFP-4000W",
+        "LEBAR JUMBO (CM)": 96
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NP VICTORIA BAY VB2PINW FSC",
+        "LEBAR JUMBO (CM)": 130
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL ROYALTY EARTH 250S RE-XPNK R-1",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN TRUVAI SUPPLY XN222",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "SINGLEFOLD TW BROWN ROYALTY RE-SFT-K R-3",
+        "LEBAR JUMBO (CM)": 117
+    },
+    {
+        "NAMA PRODUK": "M-FOLD TOWEL BROWN BELFAIR 54002",
+        "LEBAR JUMBO (CM)": 169
+    },
+    {
+        "NAMA PRODUK": "NP DINNER KITCHEN ESSENTIALS 117189",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NP COCKTAIL DHG PROFESIONAL BN9X9 4000-2",
+        "LEBAR JUMBO (CM)": 46
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "LUNCH NAPKIN ABALINE PAM-09352",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R3",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE LUCKY SUPER 80S 11260-12",
+        "LEBAR JUMBO (CM)": 126
+    },
+    {
+        "NAMA PRODUK": "HRT ENTICE R2-080 COC FSC",
+        "LEBAR JUMBO (CM)": 169
+    },
+    {
+        "NAMA PRODUK": "HRT DIVINE HRT600K",
+        "LEBAR JUMBO (CM)": 169.5
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL SILKY SOFT CPTW6600",
+        "LEBAR JUMBO (CM)": 169.5
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "JRT MORCON VT1150 350M",
+        "LEBAR JUMBO (CM)": 266.5
+    },
+    {
+        "NAMA PRODUK": "JRT SMALLCORE MAXIMUS X910",
+        "LEBAR JUMBO (CM)": 279
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE LUCKY SUPER 80S 11260-12",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON VT1106 TW 34 GSM R-1",
+        "LEBAR JUMBO (CM)": 119.5
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL M-FOLD BETHEL 250'S MFP-4000W",
+        "LEBAR JUMBO (CM)": 96
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NP VICTORIA BAY VB2PINW FSC",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN TRUVAI SUPPLY XN222",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "SINGLEFOLD TW BROWN ROYALTY RE-SFT-K R-3",
+        "LEBAR JUMBO (CM)": 117
+    },
+    {
+        "NAMA PRODUK": "M-FOLD TOWEL BROWN BELFAIR 54002",
+        "LEBAR JUMBO (CM)": 169
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH MORCON WHITE  L12500 R-3",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NP DINNER KITCHEN ESSENTIALS 117189",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NP COCKTAIL DHG PROFESIONAL BN9X9 4000-2",
+        "LEBAR JUMBO (CM)": 46
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "LUNCH NAPKIN ABALINE PAM-09352",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R3",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE LUCKY SUPER 80S 11260-12",
+        "LEBAR JUMBO (CM)": 126
+    },
+    {
+        "NAMA PRODUK": "HRT DIVINE HRT600K",
+        "LEBAR JUMBO (CM)": 169.5
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL SILKY SOFT CPTW6600",
+        "LEBAR JUMBO (CM)": 169.5
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL LEWA CP1000-6 LW 630S R-1",
+        "LEBAR JUMBO (CM)": 169.5
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "JRT MORCON VT1150 350M",
+        "LEBAR JUMBO (CM)": 266.5
+    },
+    {
+        "NAMA PRODUK": "JRT SMALLCORE MAXIMUS X910",
+        "LEBAR JUMBO (CM)": 279
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE LUCKY SUPER 80S 11260-12",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HRT DIVINE HRT600K",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON VT1106 TW 34 GSM R-1",
+        "LEBAR JUMBO (CM)": 119.5
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL M-FOLD BETHEL 250'S MFP-4000W",
+        "LEBAR JUMBO (CM)": 119.5
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NP VICTORIA BAY VB2PINW FSC",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL ROYALTY EARTH 250S RE-XPNK R-1",
+        "LEBAR JUMBO (CM)": 112
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN TRUVAI SUPPLY XN222",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "SINGLEFOLD TW BROWN ROYALTY RE-SFT-K R-3",
+        "LEBAR JUMBO (CM)": 117
+    },
+    {
+        "NAMA PRODUK": "M-FOLD TOWEL BROWN BELFAIR 54002",
+        "LEBAR JUMBO (CM)": 145
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH MORCON WHITE  L12500 R-3",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NP DINNER KITCHEN ESSENTIALS 117189",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NP COCKTAIL DHG PROFESIONAL BN9X9 4000-2",
+        "LEBAR JUMBO (CM)": 46
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "LUNCH NAPKIN ABALINE PAM-09352",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R3",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "HRT DIVINE HRT800K",
+        "LEBAR JUMBO (CM)": 169.5
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL LEWA CP1000-6 LW 630S",
+        "LEBAR JUMBO (CM)": 169.5
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "JRT MORCON VT1150 350M",
+        "LEBAR JUMBO (CM)": 266.5
+    },
+    {
+        "NAMA PRODUK": "JRT SMALLCORE MAXIMUS X910",
+        "LEBAR JUMBO (CM)": 279
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE LUCKY SUPER 80S 11260-12",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HRT DIVINE HRT600K",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON VT1106 TW 34 GSM R-1",
+        "LEBAR JUMBO (CM)": 119.5
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL M-FOLD BETHEL 250'S MFP-4000W",
+        "LEBAR JUMBO (CM)": 119.5
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL ROYALTY EARTH 250S RE-XPNK R-1",
+        "LEBAR JUMBO (CM)": 112
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN TRUVAI SUPPLY XN222",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "SINGLEFOLD TW BROWN ROYALTY RE-SFT-K R-3",
+        "LEBAR JUMBO (CM)": 117
+    },
+    {
+        "NAMA PRODUK": "M-FOLD TOWEL BROWN BELFAIR 54002",
+        "LEBAR JUMBO (CM)": 145
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH MORCON WHITE  L12500 R-3",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NP DINNER KITCHEN ESSENTIALS 117189",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NP COCKTAIL DHG PROFESIONAL BN9X9 4000-2",
+        "LEBAR JUMBO (CM)": 23
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 43
+    },
+    {
+        "NAMA PRODUK": "LUNCH NAPKIN ABALINE PAM-09352",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R3",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "SOFTPACK O-KLEEN 170S 2 PLY [850]",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HRT CLEAN & COMFORT REC HW 30350",
+        "LEBAR JUMBO (CM)": 149
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "JRT MORCON VT1150 350M",
+        "LEBAR JUMBO (CM)": 266.5
+    },
+    {
+        "NAMA PRODUK": "JRT SMALLCORE MAXIMUS X910",
+        "LEBAR JUMBO (CM)": 279
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE LUCKY SUPER 80S 11260-12",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HRT DIVINE HRT800K",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "JUMBO PACK SIERRA 600S",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL LEWA CP1000-6 LW 630S",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON VT1106 TW 34 GSM R-1",
+        "LEBAR JUMBO (CM)": 119.5
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL M-FOLD BETHEL 250'S MFP-4000W",
+        "LEBAR JUMBO (CM)": 119.5
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL ROYALTY EARTH 250S RE-XPNK R-1",
+        "LEBAR JUMBO (CM)": 112
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN TRUVAI SUPPLY XN222",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "SINGLEFOLD TW BROWN ROYALTY RE-SFT-K R-3",
+        "LEBAR JUMBO (CM)": 117
+    },
+    {
+        "NAMA PRODUK": "M-FOLD TOWEL BROWN BELFAIR 54002",
+        "LEBAR JUMBO (CM)": 145
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH MORCON WHITE  L12500 R-3",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NP DINNER KITCHEN ESSENTIALS 117189",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NP COCKTAIL DHG PROFESIONAL BN9X9 4000-2",
+        "LEBAR JUMBO (CM)": 23
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 43
+    },
+    {
+        "NAMA PRODUK": "LUNCH NAPKIN ABALINE PAM-09352",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R3",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "SOFTPACK O-KLEEN 170S 2 PLY [850]",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HRT CLEAN & COMFORT REC HW 30350",
+        "LEBAR JUMBO (CM)": 149
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL LEWA CP1000-6 LW 630S",
+        "LEBAR JUMBO (CM)": 169.5
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "JRT MORCON VT1150 350M",
+        "LEBAR JUMBO (CM)": 266.5
+    },
+    {
+        "NAMA PRODUK": "JRT ENTICE 300M VAR 9,5CM R3-5495 COC FS",
+        "LEBAR JUMBO (CM)": 266.5
+    },
+    {
+        "NAMA PRODUK": "JRT SMALLCORE MAXIMUS X910",
+        "LEBAR JUMBO (CM)": 279
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE LUCKY SUPER 80S 11260-12",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL LEWA CP1000-6 LW 630S",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON VT1106 TW 34 GSM R-1",
+        "LEBAR JUMBO (CM)": 119.5
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL M-FOLD BETHEL 250'S MFP-4000W",
+        "LEBAR JUMBO (CM)": 119.5
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL ROYALTY EARTH 250S RE-XPNK R-1",
+        "LEBAR JUMBO (CM)": 112
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN TRUVAI SUPPLY XN222",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "M-FOLD TOWEL BROWN BELFAIR 54002",
+        "LEBAR JUMBO (CM)": 145
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH MORCON WHITE  L12500 R-3",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NP COCKTAIL DHG PROFESIONAL BN9X9 4000-2",
+        "LEBAR JUMBO (CM)": 23
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 43
+    },
+    {
+        "NAMA PRODUK": "LUNCH NAPKIN ABALINE PAM-09352",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R3",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "SOFTPACK O-KLEEN 170S 2 PLY (850) R-1",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HRT TRUVAI SUPPLY HT112 KRAFT",
+        "LEBAR JUMBO (CM)": 169
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "JRT ENTICE 300M VAR 9,5CM R3-5495 COC FS",
+        "LEBAR JUMBO (CM)": 266.5
+    },
+    {
+        "NAMA PRODUK": "JRT SMALLCORE MAXIMUS X910",
+        "LEBAR JUMBO (CM)": 279
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE LUCKY SUPER 80S 11260-12",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "JRT ENTICE 300M VAR 9,5CM R3-5495 COC FS",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON VT1106 TW 34 GSM R-1",
+        "LEBAR JUMBO (CM)": 119.5
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL M-FOLD BETHEL 250'S MFP-4000W",
+        "LEBAR JUMBO (CM)": 119.5
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 96
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL ROYALTY EARTH 250S RE-XPNK R-1",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN TRUVAI SUPPLY XN222",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN MORCON 4545VN R-1",
+        "LEBAR JUMBO (CM)": 162
+    },
+    {
+        "NAMA PRODUK": "M-FOLD TOWEL BROWN BELFAIR 54002",
+        "LEBAR JUMBO (CM)": 145
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH MORCON WHITE  L12500 R-3",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NP COCKTAIL DHG PROFESIONAL BN9X9 4000-2",
+        "LEBAR JUMBO (CM)": 46
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 43
+    },
+    {
+        "NAMA PRODUK": "LUNCH NAPKIN ABALINE PAM-09352",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R3",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "SOFTPACK O-KLEEN 170S 2 PLY (850) R-1",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HRT TRUVAI SUPPLY HT112 KRAFT",
+        "LEBAR JUMBO (CM)": 165
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "JRT ENTICE 300M VAR 9,5CM R3-5495 COC FS",
+        "LEBAR JUMBO (CM)": 266.5
+    },
+    {
+        "NAMA PRODUK": "JRT SOUTHERN SOFT 3.75\" X 1000 FT",
+        "LEBAR JUMBO (CM)": 2730
+    },
+    {
+        "NAMA PRODUK": "JRT SMALLCORE MAXIMUS X910",
+        "LEBAR JUMBO (CM)": 279
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE LUCKY SUPER 80S 11260-12",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "JRT ENTICE 300M VAR 9,5CM R3-5495 COC FS",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON VT1106 TW 34 GSM R-1",
+        "LEBAR JUMBO (CM)": 119.5
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL ROYALTY EARTH 250S RE-XPNK R-1",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN MORCON 4545VN R-1",
+        "LEBAR JUMBO (CM)": 162
+    },
+    {
+        "NAMA PRODUK": "M-FOLD TOWEL BROWN BELFAIR 54002",
+        "LEBAR JUMBO (CM)": 145
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH MORCON WHITE  L12500 R-3",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NP COCKTAIL DHG PROFESIONAL BN9X9 4000-2",
+        "LEBAR JUMBO (CM)": 46
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 43
+    },
+    {
+        "NAMA PRODUK": "LUNCH NAPKIN ABALINE PAM-09352",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "SOFTPACK O-KLEEN 170S 2 PLY (850) R-1",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HRT TRUVAI SUPPLY HT112 KRAFT",
+        "LEBAR JUMBO (CM)": 165
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "JRT SOUTHERN SOFT 3.75\" X 1000 FT",
+        "LEBAR JUMBO (CM)": 263.5
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL RIGHT CHOICE BUNZL 78000417",
+        "LEBAR JUMBO (CM)": 279
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE LUCKY SUPER 80S 11260-12",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "JRT ENTICE 300M VAR 9,5CM R3-5495 COC FS",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "JUMBO PACK SIERRA 600S",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL ROYALTY EARTH 250S RE-XPNK R-1",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN TRUVAI SUPPLY XN222",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN MORCON 4545VN R-1",
+        "LEBAR JUMBO (CM)": 162
+    },
+    {
+        "NAMA PRODUK": "M-FOLD TOWEL BROWN BELFAIR 54002",
+        "LEBAR JUMBO (CM)": 145
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH MORCON WHITE  L12500 R-3",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 36
+    },
+    {
+        "NAMA PRODUK": "NP COCKTAIL DHG PROFESIONAL BN9X9 4000-2",
+        "LEBAR JUMBO (CM)": 48
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 43
+    },
+    {
+        "NAMA PRODUK": "LUNCH NAPKIN ABALINE PAM-09352",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "SOFTPACK O-KLEEN 170S 2 PLY (850) R-1",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX ROYALTY PREMIER 100S 19X19CM",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HRT TRUVAI SUPPLY HT112 KRAFT",
+        "LEBAR JUMBO (CM)": 165
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "JRT SOUTHERN SOFT 3.75\" X 1000 FT",
+        "LEBAR JUMBO (CM)": 263.5
+    },
+    {
+        "NAMA PRODUK": "JRT ROYALTY PREMIER RE-JT10002R",
+        "LEBAR JUMBO (CM)": 267
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL RIGHT CHOICE BUNZL 78000417",
+        "LEBAR JUMBO (CM)": 255
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE LUCKY SUPER 80S 11260-12",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "JRT ENTICE 300M VAR 9,5CM R3-5495 COC FS",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN TRUVAI SUPPLY XN222",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN MORCON 4545VN R-1",
+        "LEBAR JUMBO (CM)": 162
+    },
+    {
+        "NAMA PRODUK": "M-FOLD TOWEL BROWN BELFAIR 54002",
+        "LEBAR JUMBO (CM)": 145
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON VT1106 TW 34 GSM R-1",
+        "LEBAR JUMBO (CM)": 166.5
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH MORCON WHITE  L12500 R-3",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 36
+    },
+    {
+        "NAMA PRODUK": "NP COCKTAIL DHG PROFESIONAL BN9X9 4000-2",
+        "LEBAR JUMBO (CM)": 46
+    },
+    {
+        "NAMA PRODUK": "NAPKIN COCKTAIL TRUVAI SUPPLY BN241",
+        "LEBAR JUMBO (CM)": 48
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "LUNCH NAPKIN ABALINE PAM-09352",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "SOFTPACK O-KLEEN 170S 2 PLY (850) R-1",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX ROYALTY PREMIER 100S 19X19CM",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HRT TRUVAI SUPPLY HT112 KRAFT",
+        "LEBAR JUMBO (CM)": 165
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "JRT ROYALTY PREMIER RE-JT10002R",
+        "LEBAR JUMBO (CM)": 267
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL RIGHT CHOICE BUNZL 78000417",
+        "LEBAR JUMBO (CM)": 255
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE LUCKY SUPER 80S 11260-12",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "JRT ENTICE 300M VAR 9,5CM R3-5495 COC FS",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "JUMBO PACK SIERRA 600S",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN TRUVAI SUPPLY XN222",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN MORCON 4545VN R-1",
+        "LEBAR JUMBO (CM)": 162
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON VT1106 TW 34 GSM R-1",
+        "LEBAR JUMBO (CM)": 166.5
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH MORCON WHITE  L12500 R-3",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 36
+    },
+    {
+        "NAMA PRODUK": "NAPKIN COCKTAIL TRUVAI SUPPLY BN241",
+        "LEBAR JUMBO (CM)": 46
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "LUNCH NAPKIN ABALINE PAM-09352",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "SOFTPACK O-KLEEN 170S 2 PLY (850) R-1",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX ROYALTY PREMIER 100S 19X19CM",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL TOWEL CP600 DIVINE",
+        "LEBAR JUMBO (CM)": 167
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "JRT ROYALTY PREMIER RE-JT10002R",
+        "LEBAR JUMBO (CM)": 267
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL RIGHT CHOICE BUNZL 78000417",
+        "LEBAR JUMBO (CM)": 255
+    },
+    {
+        "NAMA PRODUK": "JRT ENTICE 300M VAR 9,5CM R3-5495 COC FS",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "JUMBO PACK SIERRA 600S",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN NOVA QS4300 500'S R-2",
+        "LEBAR JUMBO (CM)": 162
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON VT1106 TW 34 GSM R-1",
+        "LEBAR JUMBO (CM)": 166.5
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 36
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "LUNCH NAPKIN ABALINE PAM-09352",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX ROYALTY PREMIER 100S 19X19CM",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE GENUINE JOE 26085",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HRT 45GSM 1900GR  NON EMBOSED",
+        "LEBAR JUMBO (CM)": 167
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "TOILET ROLL SOUTHERN SOFT 10.5X9.6 CM",
+        "LEBAR JUMBO (CM)": 271
+    },
+    {
+        "NAMA PRODUK": "JRT ROYALTY PREMIER RE-JT10002R",
+        "LEBAR JUMBO (CM)": 267
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL RIGHT CHOICE BUNZL 78000417",
+        "LEBAR JUMBO (CM)": 255
+    },
+    {
+        "NAMA PRODUK": "JRT ENTICE 300M VAR 9,5CM R3-5495 COC FS",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "JUMBO PACK SIERRA 600S",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN NOVA QS4300 500'S R-2",
+        "LEBAR JUMBO (CM)": 162
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON VT1106 TW 34 GSM R-1",
+        "LEBAR JUMBO (CM)": 166.5
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH MORCON WHITE  L12500 R-3",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 36
+    },
+    {
+        "NAMA PRODUK": "NAPKIN COCKTAIL TRUVAI SUPPLY BN241",
+        "LEBAR JUMBO (CM)": 46
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "LUNCH NAPKIN ABALINE PAM-09352",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE GENUINE JOE 26085",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX ROYALTY PREMIER 100S 19X19CM",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX MORCON VALAY VT2130 R1",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HRT 45GSM 1900GR  NON EMBOSED",
+        "LEBAR JUMBO (CM)": 158
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "TOILET ROLL SOUTHERN SOFT 10.5X9.6 CM",
+        "LEBAR JUMBO (CM)": 271
+    },
+    {
+        "NAMA PRODUK": "JRT RIGHT CHOICE BUNZL 78000416",
+        "LEBAR JUMBO (CM)": 259
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL RIGHT CHOICE BUNZL 78000417",
+        "LEBAR JUMBO (CM)": 255
+    },
+    {
+        "NAMA PRODUK": "JRT SOUTHERN SOFT 3.75\" X 1000 FT",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "TOILET ROLL SOUTHERN SOFT 10.5X9.6 CM",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE GENUINE JOE 26085",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN NOVA QS4300 500'S R-2",
+        "LEBAR JUMBO (CM)": 162
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON VT1106 TW 34 GSM R-1",
+        "LEBAR JUMBO (CM)": 166.5
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH MORCON WHITE  L12500 R-3",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 36
+    },
+    {
+        "NAMA PRODUK": "NAPKIN COCKTAIL TRUVAI SUPPLY BN241",
+        "LEBAR JUMBO (CM)": 46
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "LUNCH NAPKIN ABALINE PAM-09352",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE GENUINE JOE 26085",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "SOFTPACK COMET BEAUTY TISSUE REFILL PACK",
+        "LEBAR JUMBO (CM)": 129
+    },
+    {
+        "NAMA PRODUK": "FACIAL SOFTPACK O-KLEEN 250'S 2PLY R-2",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX MORCON VALAY VT2130 R1",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HRT 45GSM 1900GR  NON EMBOSED",
+        "LEBAR JUMBO (CM)": 158
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "TOILET ROLL SOUTHERN SOFT 10.5X9.6 CM",
+        "LEBAR JUMBO (CM)": 275
+    },
+    {
+        "NAMA PRODUK": "JRT RIGHT CHOICE BUNZL 78000416",
+        "LEBAR JUMBO (CM)": 259
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL RIGHT CHOICE BUNZL 78000417",
+        "LEBAR JUMBO (CM)": 255
+    },
+    {
+        "NAMA PRODUK": "JRT SOUTHERN SOFT 3.75\" X 1000 FT",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "TOILET ROLL SOUTHERN SOFT 10.5X9.6 CM",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE GENUINE JOE 26085",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN NOVA QS4300 500'S R-2",
+        "LEBAR JUMBO (CM)": 162
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON VT1106 TW 34 GSM R-1",
+        "LEBAR JUMBO (CM)": 166.5
+    },
+    {
+        "NAMA PRODUK": "M-FOLD TOWEL BROWN BELFAIR 54002",
+        "LEBAR JUMBO (CM)": 166.5
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH MORCON WHITE  L12500 R-3",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 36
+    },
+    {
+        "NAMA PRODUK": "NAPKIN COCKTAIL TRUVAI SUPPLY BN241",
+        "LEBAR JUMBO (CM)": 46
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "LUNCH NAPKIN ABALINE PAM-09352",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE GENUINE JOE 26085",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "FACIAL SOFTPACK O-KLEEN 250'S 2PLY R-2",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX MORCON VALAY VT2130 R1",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HRT 45GSM 1900GR  NON EMBOSED",
+        "LEBAR JUMBO (CM)": 158
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "TOILET ROLL SOUTHERN SOFT 10.5X9.6 CM",
+        "LEBAR JUMBO (CM)": 275
+    },
+    {
+        "NAMA PRODUK": "JRT RIGHT CHOICE BUNZL 78000416",
+        "LEBAR JUMBO (CM)": 259
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL RIGHT CHOICE BUNZL 78000417",
+        "LEBAR JUMBO (CM)": 255
+    },
+    {
+        "NAMA PRODUK": "JRT SOUTHERN SOFT 3.75\" X 1000 FT",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "TOILET ROLL SOUTHERN SOFT 10.5X9.6 CM",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE GENUINE JOE 26085",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "JUMBO PACK SIERRA 600S",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE LUCKY SUPER 80S 11260-12",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN NOVA QS4300 500'S R-2",
+        "LEBAR JUMBO (CM)": 162
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN MORCON 4545VN R-1",
+        "LEBAR JUMBO (CM)": 162
+    },
+    {
+        "NAMA PRODUK": "M-FOLD TOWEL BROWN BELFAIR 54002",
+        "LEBAR JUMBO (CM)": 166.5
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH MORCON WHITE  L12500 R-3",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 36
+    },
+    {
+        "NAMA PRODUK": "NAPKIN COCKTAIL TRUVAI SUPPLY BN241",
+        "LEBAR JUMBO (CM)": 46
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "LUNCH NAPKIN ABALINE PAM-09352",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE GENUINE JOE 26085",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "FACIAL SOFTPACK O-KLEEN 250'S 2PLY R-2",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX MORCON VALAY VT2130 R1",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX ROYALTY PREMIER 100S 19X19CM",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HRT 45GSM 1900GR  NON EMBOSED",
+        "LEBAR JUMBO (CM)": 158
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "TOILET ROLL SOUTHERN SOFT 10.5X9.6 CM",
+        "LEBAR JUMBO (CM)": 277
+    },
+    {
+        "NAMA PRODUK": "TOILET ROLL ENTICE 700S R3 COC FSC",
+        "LEBAR JUMBO (CM)": 277
+    },
+    {
+        "NAMA PRODUK": "JRT RIGHT CHOICE BUNZL 78000416",
+        "LEBAR JUMBO (CM)": 269
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL RIGHT CHOICE BUNZL 78000417",
+        "LEBAR JUMBO (CM)": 255
+    },
+    {
+        "NAMA PRODUK": "TOILET ROLL SOUTHERN SOFT 10.5X9.6 CM",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE GENUINE JOE 26085",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "JRT SOUTHERN SOFT 3.75\" X 1000 FT",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN MORCON 4545VN R-1",
+        "LEBAR JUMBO (CM)": 162
+    },
+    {
+        "NAMA PRODUK": "M-FOLD TOWEL BROWN BELFAIR 54002",
+        "LEBAR JUMBO (CM)": 166.5
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH LW LNK500",
+        "LEBAR JUMBO (CM)": 60
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH MORCON WHITE  L12500 R-3",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 36
+    },
+    {
+        "NAMA PRODUK": "NAPKIN COCKTAIL TRUVAI SUPPLY BN241",
+        "LEBAR JUMBO (CM)": 46
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "LUNCH NAPKIN ABALINE PAM-09352",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH LW LNK500",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE GENUINE JOE 26085",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "FACIAL SOFTPACK O-KLEEN 250'S 2PLY R-2",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX ROYALTY PREMIER 100S 19X19CM",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HRT 45GSM 1900GR  NON EMBOSED",
+        "LEBAR JUMBO (CM)": 158
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "TOILET ROLL ENTICE 700S R3 COC FSC",
+        "LEBAR JUMBO (CM)": 277
+    },
+    {
+        "NAMA PRODUK": "JRT RIGHT CHOICE BUNZL 78000416",
+        "LEBAR JUMBO (CM)": 269
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL RIGHT CHOICE BUNZL 78000417",
+        "LEBAR JUMBO (CM)": 255
+    },
+    {
+        "NAMA PRODUK": "TOILET ROLL SOUTHERN SOFT 10.5X9.6 CM",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "TOILET ROLL ENTICE 700S R3 COC FSC",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE GENUINE JOE 26085",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN MORCON 4545VN R-1",
+        "LEBAR JUMBO (CM)": 162
+    },
+    {
+        "NAMA PRODUK": "M-FOLD TOWEL BROWN BELFAIR 54002",
+        "LEBAR JUMBO (CM)": 166.5
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH LW LNK500",
+        "LEBAR JUMBO (CM)": 60
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH MORCON WHITE  L12500 R-3",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 36
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH LW LNK500",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE GENUINE JOE 26085",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "FACIAL SOFTPACK O-KLEEN 250'S 2PLY R-2",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX ROYALTY PREMIER 100S 19X19CM",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX MORCON VALAY VT2130 R1",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HRT 45GSM 1900GR  NON EMBOSED",
+        "LEBAR JUMBO (CM)": 158
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "TOILET ROLL ENTICE 700S R3 COC FSC",
+        "LEBAR JUMBO (CM)": 277
+    },
+    {
+        "NAMA PRODUK": "TOILET ROLL ENTICE 400S R2 COC FSC",
+        "LEBAR JUMBO (CM)": 277
+    },
+    {
+        "NAMA PRODUK": "JRT RIGHT CHOICE BUNZL 78000416",
+        "LEBAR JUMBO (CM)": 269
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL RIGHT CHOICE BUNZL 78000417",
+        "LEBAR JUMBO (CM)": 255
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL TOWEL CP600 DIVINE",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "TOILET ROLL ENTICE 700S R3 COC FSC",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE GENUINE JOE 26085",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "JUMBO PACK SIERRA 600S",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN TRUVAI SUPPLY XN222",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN MORCON 4545VN R-1",
+        "LEBAR JUMBO (CM)": 162
+    },
+    {
+        "NAMA PRODUK": "M-FOLD TOWEL BROWN BELFAIR 54002",
+        "LEBAR JUMBO (CM)": 166.5
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH LW LNK500",
+        "LEBAR JUMBO (CM)": 60
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH MORCON WHITE  L12500 R-3",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 36
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH LW LNK500",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "FACIAL SOFTPACK O-KLEEN 250'S 2PLY R-2",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX MORCON VALAY VT2130 R1",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HRT 45GSM 1900GR  NON EMBOSED",
+        "LEBAR JUMBO (CM)": 158
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "TOILET ROLL ENTICE 400S R2 COC FSC",
+        "LEBAR JUMBO (CM)": 277
+    },
+    {
+        "NAMA PRODUK": "JRT RIGHT CHOICE BUNZL 78000416",
+        "LEBAR JUMBO (CM)": 269
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL RIGHT CHOICE BUNZL 78000417",
+        "LEBAR JUMBO (CM)": 255
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL LEWA CP1000-6 LW 630S",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "JUMBO PACK SIERRA 600S",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE GENUINE JOE 26085",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "TOILET ROLL ENTICE 700S R3 COC FSC",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN TRUVAI SUPPLY XN222",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN MORCON 4545VN R-1",
+        "LEBAR JUMBO (CM)": 162
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN TRUVAI SUPPLY XN222",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "M-FOLD TOWEL BROWN BELFAIR 54002",
+        "LEBAR JUMBO (CM)": 145
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON VT1106 TW 34 GSM R-1",
+        "LEBAR JUMBO (CM)": 166.5
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH LW LNK500",
+        "LEBAR JUMBO (CM)": 60
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH MORCON WHITE  L12500 R-3",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 36
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH LW LNK500",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "FACIAL SOFTPACK O-KLEEN 250'S 2PLY R-2",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX MORCON VALAY VT2130 R1",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX ROYALTY PREMIER 100S 19X19CM",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HRT CLOUDSOFT CHARMAN 183M",
+        "LEBAR JUMBO (CM)": 165.5
+    },
+    {
+        "NAMA PRODUK": "HRT 45GSM 1900GR  NON EMBOSED",
+        "LEBAR JUMBO (CM)": 158
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "TOILET ROLL ENTICE 400S R2 COC FSC",
+        "LEBAR JUMBO (CM)": 277
+    },
+    {
+        "NAMA PRODUK": "JRT RIGHT CHOICE BUNZL 78000416",
+        "LEBAR JUMBO (CM)": 269
+    },
+    {
+        "NAMA PRODUK": "JRT ALLEGIANT K633 0007 R-1",
+        "LEBAR JUMBO (CM)": 264
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL RIGHT CHOICE BUNZL 78000417",
+        "LEBAR JUMBO (CM)": 255
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL LEWA CP1000-6 LW 630S",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "JUMBO PACK SIERRA 600S",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE GENUINE JOE 26085",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "TOILET ROLL ENTICE 700S R3 COC FSC",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "TOILET ROLL ENTICE 400S R2 COC FSC",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN TRUVAI SUPPLY XN222",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN TRUVAI SUPPLY XN222",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON VT1106 TW 34 GSM R-1",
+        "LEBAR JUMBO (CM)": 166.5
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH LW LNK500",
+        "LEBAR JUMBO (CM)": 60
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH MORCON WHITE  L12500 R-3",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 36
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH LW LNK500",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "FACIAL SOFTPACK O-KLEEN 250'S 2PLY R-2",
+        "LEBAR JUMBO (CM)": 140
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX ROYALTY PREMIER 100S 19X19CM",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HRT CLOUDSOFT CHARMAN 183M",
+        "LEBAR JUMBO (CM)": 165.5
+    },
+    {
+        "NAMA PRODUK": "HRT TRUVAI SUPPLY HT 111 - 305 M",
+        "LEBAR JUMBO (CM)": 165.5
+    },
+    {
+        "NAMA PRODUK": "HRT 45GSM 1900GR  NON EMBOSED",
+        "LEBAR JUMBO (CM)": 158
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "JRT ALLEGIANT K633 0007 R-1",
+        "LEBAR JUMBO (CM)": 264
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL RIGHT CHOICE BUNZL 78000417",
+        "LEBAR JUMBO (CM)": 255
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE GENUINE JOE 26085",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "TOILET ROLL ENTICE 400S R2 COC FSC",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN TRUVAI SUPPLY XN222",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN TRUVAI SUPPLY XN222",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH LW LNK500",
+        "LEBAR JUMBO (CM)": 60
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH MORCON WHITE  L12500 R-3",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 36
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH LW LNK500",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "FACIAL SOFTPACK O-KLEEN 250'S 2PLY R-2",
+        "LEBAR JUMBO (CM)": 140
+    },
+    {
+        "NAMA PRODUK": "SOFTPACK SM INTERNATIONAL 100S R-1",
+        "LEBAR JUMBO (CM)": 126
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HRT TRUVAI SUPPLY HT 111 - 305 M",
+        "LEBAR JUMBO (CM)": 165.5
+    },
+    {
+        "NAMA PRODUK": "HRT 45GSM 1900GR  NON EMBOSED",
+        "LEBAR JUMBO (CM)": 158
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "JRT ALLEGIANT K633 0007 R-1",
+        "LEBAR JUMBO (CM)": 264
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL RIGHT CHOICE BUNZL 78000417",
+        "LEBAR JUMBO (CM)": 255
+    },
+    {
+        "NAMA PRODUK": "FACIAL BOX CUBE GENUINE JOE 26085",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "TOILET ROLL ENTICE 700S R3 COC FSC",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "JUMBO PACK SIERRA 600S",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NP VICTORIA BAY VB2PINW FSC",
+        "LEBAR JUMBO (CM)": 162
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN TRUVAI SUPPLY XN222",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH LW LNK500",
+        "LEBAR JUMBO (CM)": 60
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH MORCON WHITE  L12500 R-3",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER SMART SM2PWDN FSC R-1",
+        "LEBAR JUMBO (CM)": 35
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH LW LNK500",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH COBALT 2 PLY 100S",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "SOFTPACK SM INTERNATIONAL 100S R-1",
+        "LEBAR JUMBO (CM)": 126
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HRT TRUVAI SUPPLY HT 111 - 305 M",
+        "LEBAR JUMBO (CM)": 165.5
+    },
+    {
+        "NAMA PRODUK": "HRT 45GSM 1900GR  NON EMBOSED",
+        "LEBAR JUMBO (CM)": 158
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "JRT ALLEGIANT K633 0007 R-1",
+        "LEBAR JUMBO (CM)": 264
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL RIGHT CHOICE BUNZL 78000417",
+        "LEBAR JUMBO (CM)": 255
+    },
+    {
+        "NAMA PRODUK": "JUMBO PACK SIERRA 600S",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH COBALT 2 PLY 100S",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NP VICTORIA BAY VB2PINW FSC",
+        "LEBAR JUMBO (CM)": 162
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN TRUVAI SUPPLY XN222",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH LW LNK500",
+        "LEBAR JUMBO (CM)": 60
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH MORCON WHITE  L12500 R-3",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER SMART SM2PWDN FSC R-1",
+        "LEBAR JUMBO (CM)": 35
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "SOFTPACK SM INTERNATIONAL 100S R-1",
+        "LEBAR JUMBO (CM)": 126
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HRT TRUVAI SUPPLY HT 111 - 305 M",
+        "LEBAR JUMBO (CM)": 165.5
+    },
+    {
+        "NAMA PRODUK": "HRT BETHEL 32 GSM 244M RTV-8006",
+        "LEBAR JUMBO (CM)": 165.5
+    },
+    {
+        "NAMA PRODUK": "HRT 45GSM 1900GR  NON EMBOSED",
+        "LEBAR JUMBO (CM)": 158
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 147
+    },
+    {
+        "NAMA PRODUK": "JRT ALLEGIANT K633 0007 R-1",
+        "LEBAR JUMBO (CM)": 264
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL RIGHT CHOICE BUNZL 78000417",
+        "LEBAR JUMBO (CM)": 255
+    },
+    {
+        "NAMA PRODUK": "JUMBO PACK SIERRA 600S",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "M-FOLD DIVINE MF4000W WHITE",
+        "LEBAR JUMBO (CM)": 117
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NP VICTORIA BAY VB2PINW FSC",
+        "LEBAR JUMBO (CM)": 162
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN TRUVAI SUPPLY XN222",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH LW LNK500",
+        "LEBAR JUMBO (CM)": 60
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH MORCON WHITE  L12500 R-3",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER SMART SM2PWDN FSC R-1",
+        "LEBAR JUMBO (CM)": 35
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "SOFTPACK SM INTERNATIONAL 100S R-1",
+        "LEBAR JUMBO (CM)": 126
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HRT BETHEL 32 GSM 244M RTV-8006",
+        "LEBAR JUMBO (CM)": 165.5
+    },
+    {
+        "NAMA PRODUK": "HRT 45GSM 1900GR  NON EMBOSED",
+        "LEBAR JUMBO (CM)": 158
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 167
+    },
+    {
+        "NAMA PRODUK": "JRT ALLEGIANT K633 0007 R-1",
+        "LEBAR JUMBO (CM)": 264
+    },
+    {
+        "NAMA PRODUK": "JRT PROVADA 300M VAR 9CM FSC-3000",
+        "LEBAR JUMBO (CM)": 277
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL RIGHT CHOICE BUNZL 78000417",
+        "LEBAR JUMBO (CM)": 255
+    },
+    {
+        "NAMA PRODUK": "JUMBO PACK SIERRA 600S",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "M-FOLD DIVINE MF4000W WHITE",
+        "LEBAR JUMBO (CM)": 117
+    },
+    {
+        "NAMA PRODUK": "MULTIFOLD TOWEL EVERCLEAN 250S",
+        "LEBAR JUMBO (CM)": 119.5
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL SLIMFOLD ENTICE R3-460 COC FSC",
+        "LEBAR JUMBO (CM)": 117
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NP VICTORIA BAY VB2PINW FSC",
+        "LEBAR JUMBO (CM)": 162
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NAPKIN TRUVAI SUPPLY XN222",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "SINGLEFOLD TW BROWN ROYALTY RE-SFT-K R-3",
+        "LEBAR JUMBO (CM)": 114
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH LW LNK500",
+        "LEBAR JUMBO (CM)": 60
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH MORCON WHITE  L12500 R-3",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER SMART SM2PWDN FSC R-1",
+        "LEBAR JUMBO (CM)": 35
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "SOFTPACK SM INTERNATIONAL 100S R-1",
+        "LEBAR JUMBO (CM)": 126
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HRT BETHEL 32 GSM 244M RTV-8006",
+        "LEBAR JUMBO (CM)": 165.5
+    },
+    {
+        "NAMA PRODUK": "HRT 45GSM 1900GR  NON EMBOSED",
+        "LEBAR JUMBO (CM)": 158
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 167
+    },
+    {
+        "NAMA PRODUK": "HRT MEDLINE REC NONPBM800N",
+        "LEBAR JUMBO (CM)": 167
+    },
+    {
+        "NAMA PRODUK": "JRT PROVADA 300M VAR 9CM FSC-3000",
+        "LEBAR JUMBO (CM)": 277
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL RIGHT CHOICE BUNZL 78000417",
+        "LEBAR JUMBO (CM)": 255
+    },
+    {
+        "NAMA PRODUK": "JRT PROVADA 300M VAR 9CM FSC-3000",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL SLIMFOLD ENTICE R3-460 COC FSC",
+        "LEBAR JUMBO (CM)": 94
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NP VICTORIA BAY VB2PINW FSC",
+        "LEBAR JUMBO (CM)": 162
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH LW LNK500",
+        "LEBAR JUMBO (CM)": 60
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH MORCON WHITE  L12500 R-3",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER SMART SM2PWDN FSC R-1",
+        "LEBAR JUMBO (CM)": 35
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HRT BETHEL 32 GSM 244M RTV-8006",
+        "LEBAR JUMBO (CM)": 165.5
+    },
+    {
+        "NAMA PRODUK": "HRT 45GSM 1900GR  NON EMBOSED",
+        "LEBAR JUMBO (CM)": 158
+    },
+    {
+        "NAMA PRODUK": "JRT SOFTOWEL 500FT JRT121000",
+        "LEBAR JUMBO (CM)": 265
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL RIGHT CHOICE BUNZL 78000417",
+        "LEBAR JUMBO (CM)": 255
+    },
+    {
+        "NAMA PRODUK": "JRT PROVADA 300M VAR 9CM FSC-3000",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL SLIMFOLD ENTICE R3-460 COC FSC",
+        "LEBAR JUMBO (CM)": 94
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NP VICTORIA BAY VB2PINW FSC",
+        "LEBAR JUMBO (CM)": 162
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH LW LNK500",
+        "LEBAR JUMBO (CM)": 60
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH MORCON WHITE  L12500 R-3",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI 1/8 F DN-181-E",
+        "LEBAR JUMBO (CM)": 72
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER SMART SM2PWDN FSC R-1",
+        "LEBAR JUMBO (CM)": 35
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HRT BETHEL 32 GSM 244M RTV-8006",
+        "LEBAR JUMBO (CM)": 165.5
+    },
+    {
+        "NAMA PRODUK": "HRT BETHEL 32 GSM 183M RTV-60012",
+        "LEBAR JUMBO (CM)": 165.5
+    },
+    {
+        "NAMA PRODUK": "HRT 45GSM 1900GR  NON EMBOSED",
+        "LEBAR JUMBO (CM)": 158
+    },
+    {
+        "NAMA PRODUK": "JRT SOFTOWEL 500FT JRT121000",
+        "LEBAR JUMBO (CM)": 265
+    },
+    {
+        "NAMA PRODUK": "CENTERPULL RIGHT CHOICE BUNZL 78000417",
+        "LEBAR JUMBO (CM)": 255
+    },
+    {
+        "NAMA PRODUK": "JUMBO PACK SIERRA 600S",
+        "LEBAR JUMBO (CM)": 0
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL MORCON R720 R-1",
+        "LEBAR JUMBO (CM)": 97
+    },
+    {
+        "NAMA PRODUK": "HANDTOWEL SLIMFOLD ENTICE R3-460 COC FSC",
+        "LEBAR JUMBO (CM)": 94
+    },
+    {
+        "NAMA PRODUK": "INTERFOLD NP VICTORIA BAY VB2PINW FSC",
+        "LEBAR JUMBO (CM)": 162
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH LW LNK500",
+        "LEBAR JUMBO (CM)": 60
+    },
+    {
+        "NAMA PRODUK": "NAPKIN LUNCH MORCON WHITE  L12500 R-3",
+        "LEBAR JUMBO (CM)": 90
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER SMART SM2PWDN FSC R-1",
+        "LEBAR JUMBO (CM)": 35
+    },
+    {
+        "NAMA PRODUK": "NP TALL FOLD ROYALTY LUXURY RL-TFN205001V",
+        "LEBAR JUMBO (CM)": 33
+    },
+    {
+        "NAMA PRODUK": "NAPKIN DINNER TRUVAI SUPPLY  DN141-E",
+        "LEBAR JUMBO (CM)": 86
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 266
+    },
+    {
+        "NAMA PRODUK": "HANABIYORI FACIAL BOX 150S 16 BDL FSC R4",
+        "LEBAR JUMBO (CM)": 133
+    },
+    {
+        "NAMA PRODUK": "HRT 45GSM 1900GR  NON EMBOSED",
+        "LEBAR JUMBO (CM)": 158
+    },
+    {
+        "NAMA PRODUK": "HRT TRUVAI SUPPLY HT182 - 244M BROWN R-1",
+        "LEBAR JUMBO (CM)": 165.5
+    },
+    {
+        "NAMA PRODUK": "JRT SOFTOWEL 500FT JRT121000",
+        "LEBAR JUMBO (CM)": 265
+    },
+    {
+        "NAMA PRODUK": "JRT RIGHT CHOICE BUNZL 78000416",
+        "LEBAR JUMBO (CM)": 255
+    }
+];
+export default dataProduksi;
